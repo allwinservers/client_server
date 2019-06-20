@@ -1,0 +1,52 @@
+$def with(pay_amount,pay_applydate,pay_bankcode,pay_callbackurl,pay_memberid,pay_notifyurl,pay_orderid,pay_md5sign,pay_productname)
+<html lang="zh-CN"><head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>支付Demo</title>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!--[if lt IE 9]>
+    <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container">
+    <div class="row" style="margin:15px;">
+        <div class="col-md-12">
+            <form class="form-inline" method="post" action="https://www.pay.com/Pay_Index.html">
+                <input type="hidden" name="pay_amount" value="$pay_amount">
+                <input type="hidden" name="pay_applydate" value="$pay_applydate">
+                <input type="hidden" name="pay_bankcode" value="$pay_bankcode">
+                <input type="hidden" name="pay_callbackurl" value="$pay_callbackurl">
+                <input type="hidden" name="pay_memberid" value="$pay_memberid">
+                <input type="hidden" name="pay_notifyurl" value="$pay_notifyurl">
+                <input type="hidden" name="pay_orderid" value="$pay_orderid">
+                <input type="hidden" name="pay_md5sign" value="$pay_md5sign">
+                <input type="hidden" name="pay_productname" value="$pay_productname">
+                <button type="submit" class="btn btn-primary btn-lg">微信支付(金额：0.01元)</button>
+            </form>
+        </div>
+    </div>
+    <div class="row" style="margin:15px;">
+        <div class="col-md-12">
+            <form class="form-inline" method="post" action="https://www.whhpay.com/Pay_Index.html">
+                <input type="hidden" name="pay_amount" value="$pay_amount">
+                <input type="hidden" name="pay_applydate" value="$pay_applydate">
+                <input type="hidden" name="pay_bankcode" value="$pay_bankcode">
+                <input type="hidden" name="pay_callbackurl" value="$pay_callbackurl">
+                <input type="hidden" name="pay_memberid" value="$pay_memberid">
+                <input type="hidden" name="pay_notifyurl" value="$pay_notifyurl">
+                <input type="hidden" name="pay_orderid" value="$pay_orderid">
+                <input type="hidden" name="pay_md5sign" value="$pay_md5sign">
+                <input type="hidden" name="pay_productname" value="$pay_productname">
+                <button type="submit" class="btn btn-success btn-lg">扫码支付(金额：0.01元)</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</body>
+</html>
