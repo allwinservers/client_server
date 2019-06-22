@@ -20,7 +20,7 @@ from apps.utils import RedisOrderCount
 
 from apps.order.utils import get_today_start_end_time
 
-from apps.paycall.utils import PayCallFlm,PayCallWechat,PayCallLastPass,PayCallBase,PayCallNxys,PayCallJyys,PayCallZjnx
+from apps.paycall.utils import PayCallFlm,PayCallWechat,PayCallLastPass,PayCallBase,PayCallNxys,PayCallJyys,PayCallZjnx,PayCallYzf
 
 import time
 
@@ -153,6 +153,8 @@ class OrderAPIView(GenericViewSetCustom):
                 PayCallJyys().handwork_run(order=order)
             elif order.qr_type == 'QR020':
                 PayCallZjnx().handwork_run(order=order)
+            elif order.qr_type == 'QR025':
+                PayCallYzf().handwork_run(order=order)
         else:
             PayCallLastPass().handwork_run(order=order)
 

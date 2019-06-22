@@ -404,6 +404,16 @@ class PayCallZjnx(PayCallBase):
         kwargs.setdefault("type","QR020")
         super().__init__(**kwargs)
 
+class PayCallYzf(PayCallBase):
+
+    def __init__(self,**kwargs):
+        """
+        易支付
+        :param kwargs:
+        """
+        kwargs.setdefault("type","QR025")
+        super().__init__(**kwargs)
+
 class PayCallFlm(PayCallBase):
 
     def __init__(self,**kwargs):
