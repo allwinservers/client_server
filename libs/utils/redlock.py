@@ -11,7 +11,7 @@ from redis.exceptions import RedisError
 # # Python 3 compatibility
 # string_type = getattr(__builtins__, 'basestring', str)
 
-from education.config.redis_conf import REDISPASSWORD
+from education.config.redis_conf import REDISPASSWORD,REDISURL,REDISPORT
 
 try:
     basestring
@@ -132,7 +132,7 @@ class RedLockBase(object):
             raise MultipleRedlockException(redis_errors)
 
 class ReadLock(RedLockBase):
-    def __init__(self,connection_list=[{"host": "localhost", "port": 6379, "db": 0,"password":REDISPASSWORD},],resource=None,ttl=20*1000):
+    def __init__(self,connection_list=[{"host": REDISURL, "port": REDISPORT, "db": 0,"password":REDISPASSWORD},],resource=None,ttl=20*1000):
         super(ReadLock,self).__init__(connection_list)
         self.resource = resource
         self.ttl = ttl

@@ -1,10 +1,12 @@
 
 REDISPASSWORD = 'plokiqikj##mlad,..ad'
+REDISURL = '172.31.137.187'
+REDISPORT = '6379'
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://localhost:6379/0", # 如果redis设置密码的话，需要以这种格式host前面是密码
+        "LOCATION": "redis://{}:{}/0".format(REDISURL,REDISPORT),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             'CONNECTION_POOL_KWARGS':{"max_connections":100},
@@ -13,7 +15,7 @@ CACHES = {
     },
     "helper": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://localhost:6379/4",  # 如果redis设置密码的话，需要以这种格式host前面是密码
+        "LOCATION": "redis://{}:{}/4".format(REDISURL,REDISPORT),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             'CONNECTION_POOL_KWARGS': {"max_connections": 100},
@@ -22,7 +24,7 @@ CACHES = {
     },
     "orders": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://localhost:6379/5",  # 如果redis设置密码的话，需要以这种格式host前面是密码
+        "LOCATION": "redis://{}:{}/5".format(REDISURL,REDISPORT),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             'CONNECTION_POOL_KWARGS': {"max_connections": 100},
