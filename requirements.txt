@@ -17,5 +17,4 @@ redis
 arrow
 pyotp
 cryptokit
-uwsgi
 demjson
