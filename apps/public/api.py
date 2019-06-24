@@ -65,7 +65,9 @@ class PublicAPIView(viewsets.ViewSet):
             for item in res['group_ids']:
                 data = {"group_id": item, "message": request.data_format.get("msg")}
                 result = request_http('POST', url='http://47.244.129.198:5700/send_group_msg', data=data,
-                                 json=data, verify=False)
+                                 json=data, verify=False,headers={
+                        "Authorization" : "Bearer allwin_niubi"
+                    })
         else:
             raise PubErrorCustom("请先设置群号!")
 
