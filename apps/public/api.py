@@ -32,6 +32,8 @@ import os
 import subprocess
 from education.settings import BASE_DIR
 
+from requests import request as request_http
+
 from include.data.choices_list import Choices_to_Dict
 
 from libs.utils.google_auth import check_google_token
@@ -62,7 +64,7 @@ class PublicAPIView(viewsets.ViewSet):
         if res and 'group_ids' in res:
             for item in res['group_ids']:
                 data = {"group_id": item, "message": request.data_format.get("msg")}
-                result = request('POST', url='http://47.244.129.198:5700/send_group_msg', data=data,
+                result = request_http('POST', url='http://47.244.129.198:5700/send_group_msg', data=data,
                                  json=data, verify=False)
         else:
             raise PubErrorCustom("请先设置群号!")
