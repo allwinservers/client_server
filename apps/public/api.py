@@ -37,7 +37,7 @@ from requests import request as request_http
 from include.data.choices_list import Choices_to_Dict
 
 from libs.utils.google_auth import check_google_token
-from apps.utils import RedisHandler
+from apps.utils import RedisQQbot
 
 class PublicAPIView(viewsets.ViewSet):
 
@@ -58,7 +58,10 @@ class PublicAPIView(viewsets.ViewSet):
         if not request.data_format.get("msg"):
             raise PubErrorCustom("请输入群发的消息!")
 
-        redis_handler = RedisHandler(db='default', key="allwin_qqbot_start")
+        if not request.data_format.get("qqacc"):
+            raise PubErrorCustom("请选择QQ号!")
+
+        redis_handler = RedisQQbot(qqacc=request.data_format.get("qqacc"))
         res = redis_handler.redis_dict_get()
 
         if res and 'group_ids' in res:
@@ -73,6 +76,11 @@ class PublicAPIView(viewsets.ViewSet):
 
         return None
 
+
+    @list_route(methods=['POST'])
+    @Core_connector()
+    def get_qq_accs(self, request):
+        return {"data" : RedisQQbot().redis_get_dict_keys()}
 
     @list_route(methods=['GET'])
     @Core_connector(pagination=True)

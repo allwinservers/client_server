@@ -81,3 +81,22 @@ class RedisOrderCount(RedisHandler):
         return json.loads(res) if res else res
 
 
+class RedisQQbot(RedisHandler):
+
+    def __init__(self,**kwargs):
+        kwargs.setdefault('key',"allwin_qqbot_start")
+        kwargs.setdefault('db','default')
+        super().__init__(**kwargs)
+
+        self.qqacc = kwargs.get("qqacc",None)
+
+    def redis_dict_insert(self,value):
+        self.redis_client.hset(self.key,self.qqacc,json.dumps(value))
+
+    def redis_dict_get(self):
+        res = self.redis_client.hget(self.key,self.qqacc)
+        return json.loads(res) if res else res
+
+    def redis_get_dict_keys(self):
+        res = self.redis_client.hkeys(self.key)
+        return res
