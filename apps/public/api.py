@@ -35,6 +35,7 @@ from education.settings import BASE_DIR
 from include.data.choices_list import Choices_to_Dict
 
 from libs.utils.google_auth import check_google_token
+from apps.utils import RedisHandler
 
 class PublicAPIView(viewsets.ViewSet):
 
@@ -48,6 +49,25 @@ class PublicAPIView(viewsets.ViewSet):
         check_google_token(request.user.google_token,request.data_format.get('vercode'))
         return None
 
+    @list_route(methods=['POST'])
+    @Core_connector()
+    def qqbot_send_msg(self, request):
+
+        if not request.data_format.get("msg"):
+            raise PubErrorCustom("请输入群发的消息!")
+
+        redis_handler = RedisHandler(db='default', key="allwin_qqbot_start")
+        res = redis_handler.redis_dict_get()
+
+        if res and 'group_ids' in res:
+            for item in res['group_ids']:
+                data = {"group_id": item, "message": request.data_format.get("msg")}
+                result = request('POST', url='http://47.244.129.198:5700/send_group_msg', data=data,
+                                 json=data, verify=False)
+        else:
+            raise PubErrorCustom("请先设置群号!")
+
+        return None
 
 
     @list_route(methods=['GET'])
