@@ -77,7 +77,7 @@ class PublicAPIView(viewsets.ViewSet):
         return None
 
 
-    @list_route(methods=['POST'])
+    @list_route(methods=['GET'])
     @Core_connector()
     def get_qq_accs(self, request):
         return {"data" : RedisQQbot().redis_get_dict_keys()}
