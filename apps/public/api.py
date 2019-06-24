@@ -80,7 +80,10 @@ class PublicAPIView(viewsets.ViewSet):
     @list_route(methods=['GET'])
     @Core_connector()
     def get_qq_accs(self, request):
-        return {"data" : RedisQQbot().redis_get_dict_keys()}
+        res = RedisQQbot().redis_get_dict_keys()
+        if res:
+            res  = [ item.decode()  for item in RedisQQbot().redis_get_dict_keys() ]
+        return {"data" : res} if res else {"data":[]}
 
     @list_route(methods=['GET'])
     @Core_connector(pagination=True)
