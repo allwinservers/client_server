@@ -1045,7 +1045,8 @@ class PublicAPIView(viewsets.ViewSet):
                     "iconCls": 'el-icon-s-home',
                     "children": [
                         {"path": '/dashboard', "component": "dashboard", "name": '桌面'},
-                        {"path": '/logquery', "component": "logquery", "name": '登录日志'}
+                        {"path": '/logquery', "component": "logquery", "name": '登录日志'},
+                        {"path": '/qqbot', "component": "qqbot", "name": 'QQ消息群发'}
                     ]
                 },
                 {
