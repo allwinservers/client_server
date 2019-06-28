@@ -108,12 +108,13 @@ class PayAPIView(viewsets.ViewSet):
         page_start = (page -1) * page_size
         page_end = page_size
 
+        query_format = query_format + "order by t1.createtime desc limit %s,%s"
         query_params.append(page_start)
         query_params.append(page_end)
         ballist = BalList.objects.raw("""
             SELECT t1.*,t2.name FROM ballist as t1 
             INNER JOIN user as t2 ON t1.userid=t2.userid
-            WHERE 1=1 %s order by t1.createtime desc limit %s,%s
+            WHERE 1=1 %s 
         """%(query_format),query_params)
 
         headers = {
