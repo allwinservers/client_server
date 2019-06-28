@@ -109,6 +109,9 @@ class PayAPIView(viewsets.ViewSet):
             WHERE 1=1 %s order by t1.createtime desc
         """%(query_format),query_params)
 
+        headers = {
+            'Total': len(ballist),
+        }
 
         page=int(request.query_params_format.get('page'))
         page_size=int(request.query_params_format.get('page_size'))
@@ -116,7 +119,7 @@ class PayAPIView(viewsets.ViewSet):
         page_end = page_size * page
 
 
-        return {"data":BallistSerializer(ballist[page_start:page_end],many=True).data}
+        return {"data":BallistSerializer(ballist[page_start:page_end],many=True).data,"header":headers}
 
     # @list_route(methods=['GET'])
     # @Core_connector(pagination=True)
