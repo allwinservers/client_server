@@ -79,7 +79,6 @@ class UsersSerializer(serializers.Serializer):
 
 class BallistSerializer(serializers.Serializer):
     userid = serializers.IntegerField()
-    name = serializers.CharField()
 
     ordercode = serializers.IntegerField()
     memo = serializers.SerializerMethodField()
