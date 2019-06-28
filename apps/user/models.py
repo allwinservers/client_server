@@ -157,6 +157,7 @@ class BalList(models.Model):
     createtime = models.BigIntegerField()
 
     name = None
+    count = None
 
     def save(self, *args, **kwargs):
         t=time.mktime(timezone.now().timetuple())

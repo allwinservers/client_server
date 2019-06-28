@@ -103,23 +103,28 @@ class PayAPIView(viewsets.ViewSet):
         else:
             raise PubErrorCustom("用户类型有误!")
 
+        page=int(request.query_params_format.get('page'))
+        page_size=int(request.query_params_format.get('page_size'))
+        page_start = (page -1) * page_size
+        page_end = page_size
+
+        query_params.append(page_start)
+        query_params.append(page_end)
         ballist = BalList.objects.raw("""
             SELECT t1.*,t2.name FROM ballist as t1 
             INNER JOIN user as t2 ON t1.userid=t2.userid
-            WHERE 1=1 %s order by t1.createtime desc
+            WHERE 1=1 %s order by t1.createtime desc limit %s,%s
         """%(query_format),query_params)
 
         headers = {
-            'Total': len(ballist),
+            'Total':  BalList.objects.raw("""
+            SELECT count(1) as count FROM ballist as t1 
+            INNER JOIN user as t2 ON t1.userid=t2.userid
+            WHERE 1=1 %s order by t1.createtime desc 
+        """%(query_format),query_params).count,
         }
 
-        page=int(request.query_params_format.get('page'))
-        page_size=int(request.query_params_format.get('page_size'))
-        page_start = page_size * page - page_size
-        page_end = page_size * page
-
-
-        return {"data":BallistSerializer(ballist[page_start:page_end],many=True).data,"header":headers}
+        return {"data":BallistSerializer(ballist,many=True).data,"header":headers}
 
     # @list_route(methods=['GET'])
     # @Core_connector(pagination=True)
