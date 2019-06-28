@@ -109,7 +109,13 @@ class PayAPIView(viewsets.ViewSet):
         """%(query_format),query_params)
 
 
-        return {"data":BallistSerializer(ballist,many=True).data}
+        page=int(request.query_params_format.get('page'))
+        page_size=int(request.query_params_format.get('page_size'))
+        page_start = page_size * page - page_size
+        page_end = page_size * page
+
+
+        return {"data":BallistSerializer(ballist[page_start:page_end],many=True).data}
 
     # @list_route(methods=['GET'])
     # @Core_connector(pagination=True)
