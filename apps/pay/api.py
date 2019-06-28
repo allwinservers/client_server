@@ -79,12 +79,12 @@ class PayAPIView(viewsets.ViewSet):
 
         query = BalList.objects.all()
 
+        if self.request.query_params_format.get("memo"):
+            query = query.filter(memo=self.request.query_params_format.get("memo"))
+
         if request.user.rolecode in ["1000","1001"]:
             if self.request.query_params_format.get("userid"):
                 query = query.filter(userid=self.request.query_params_format.get("userid"))
-
-            if self.request.query_params_format.get("memo"):
-                query = query.filter(memo=self.request.query_params_format.get("memo"))
 
         elif request.user.rolecode == "2001" :
             query = query.filter(userid=request.user.userid)
@@ -93,7 +93,14 @@ class PayAPIView(viewsets.ViewSet):
             if not userlink.exists():
                 query = query.filter(userid=0)
             else:
-                query = query.filter(userid__in=[ item.userid for item in userlink ])
+                userids = [item.userid for item in userlink]
+                if self.request.query_params_format.get("userid"):
+                    if self.request.query_params_format.get("userid") in userids:
+                        query = query.filter(userid=self.request.query_params_format.get("userid"))
+                    else:
+                        query = query.filter(userid=0)
+                else:
+                    query = query.filter(userid__in=[ item.userid for item in userlink ])
         else:
             raise PubErrorCustom("用户类型有误!")
 
