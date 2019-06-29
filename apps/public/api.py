@@ -1101,7 +1101,8 @@ class PublicAPIView(viewsets.ViewSet):
                     "children": [
                         {"path": '/passcount', "component": "passcount", "name": '渠道数据'},
                         {"path": '/ordercount', "component": "ordercount", "name": '每日报表'},
-                        {"path": '/ballist_admin', "component": "ballist_admin", "name": '资金明细'}
+                        {"path": '/ballist_admin', "component": "ballist_admin", "name": '资金明细'},
+                        {"path": '/ubaladmin', "component": "ubaladmin", "name": '调账'},
                     ]
                 },
                 {
