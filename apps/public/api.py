@@ -71,6 +71,13 @@ class PublicAPIView(viewsets.ViewSet):
                                  json=data, verify=False,headers={
                         "Authorization" : "Bearer allwin_niubi"
                     })
+        if res and 'discuss_ids' in res:
+            for item in res['discuss_ids']:
+                data = {"discuss_id": item, "message": request.data_format.get("msg")}
+                result = request_http('POST', url='http://47.244.129.198:5700/send_discuss_msg', data=data,
+                                 json=data, verify=False,headers={
+                        "Authorization" : "Bearer allwin_niubi"
+                    })
         else:
             raise PubErrorCustom("请先设置群号!")
 
