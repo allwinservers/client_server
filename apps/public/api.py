@@ -94,7 +94,7 @@ class PublicAPIView(viewsets.ViewSet):
 
 
     @list_route(methods=['POST'])
-    @Core_connector()
+    @Core_connector(pagination=True)
     def get_qq_list(self, request):
         redis_handler = RedisQQbot(qqacc=request.data_format.get("self_id"))
         res = redis_handler.redis_dict_get()
