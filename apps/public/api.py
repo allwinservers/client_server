@@ -108,7 +108,7 @@ class PublicAPIView(viewsets.ViewSet):
         print(res)
         if res and 'data' in res:
             for item in res['data']:
-                if item.get('id') == request.data_format.get('data').get('id'):
+                if str(item.get('id')) == str(request.data_format.get('data').get('id')):
                     item = request.data_format.get('data')
 
         print(res)
