@@ -102,9 +102,10 @@ class PublicAPIView(viewsets.ViewSet):
 
         redis_handler = RedisQQbot(qqacc=request.query_params_format.get("self_id"))
         res = redis_handler.redis_dict_get()
-        if request.query_params_format.get("id"):
+
+        if request.query_params_format.get("name"):
             if res and 'data' in res:
-                for item in res:
+                for item in res['data']:
                     if str(request.query_params_format.get("name")) in str(item.get('name')):
                         return {"data":[item]}
         else:
@@ -133,7 +134,7 @@ class PublicAPIView(viewsets.ViewSet):
         data=[]
         if res and 'data' in res:
             for item in res['data']:
-                if str(item.get('id')) != str(request.data_format.get('data').get('id')):
+                if str(item.get('id')) != str(request.data_format.get('id')):
                     data.append(item)
         res['data'] = data
         redis_handler.redis_dict_insert(res)
