@@ -58,28 +58,31 @@ class PublicAPIView(viewsets.ViewSet):
         if not request.data_format.get("msg"):
             raise PubErrorCustom("请输入群发的消息!")
 
-        if not request.data_format.get("qqacc"):
+        if not request.data_format.get("self_id"):
             raise PubErrorCustom("请选择QQ号!")
 
-        redis_handler = RedisQQbot(qqacc=request.data_format.get("qqacc"))
+        if not request.data_format.get("data"):
+            raise PubErrorCustom("请勾选群号!")
+
+        redis_handler = RedisQQbot(qqacc=request.data_format.get("self_id"))
         res = redis_handler.redis_dict_get()
 
-        if res and 'group_ids' in res:
-            for item in res['group_ids']:
-                data = {"group_id": item, "message": request.data_format.get("msg")}
-                result = request_http('POST', url='http://47.244.129.198:5700/send_group_msg', data=data,
-                                 json=data, verify=False,headers={
-                        "Authorization" : "Bearer allwin_niubi"
-                    })
-        if res and 'discuss_ids' in res:
-            for item in res['discuss_ids']:
-                data = {"discuss_id": item, "message": request.data_format.get("msg")}
-                result = request_http('POST', url='http://47.244.129.198:5700/send_discuss_msg', data=data,
-                                 json=data, verify=False,headers={
-                        "Authorization" : "Bearer allwin_niubi"
-                    })
-        else:
-            raise PubErrorCustom("请先设置群号!")
+        if res and 'data' in res:
+            for item in request.data_format.get("data"):
+                for item1 in res['data']:
+                    if str(item.get("id")) == str(item1.get("id")):
+                        if item1.get('message_type') == 'group':
+                            data = {"group_id": item.get("id"), "message": request.data_format.get("msg")}
+                            request_http('POST', url='http://47.244.129.198:5700/send_group_msg', data=data,
+                                                  json=data, verify=False, headers={
+                                    "Authorization": "Bearer allwin_niubi"
+                                })
+                        elif item1.get('message_type') == 'discuss':
+                            data = {"discuss_id": item.get("id"), "message": request.data_format.get("msg")}
+                            request_http('POST', url='http://47.244.129.198:5700/send_discuss_msg', data=data,
+                                                  json=data, verify=False, headers={
+                                    "Authorization": "Bearer allwin_niubi"
+                                })
 
         return None
 
@@ -105,14 +108,11 @@ class PublicAPIView(viewsets.ViewSet):
     def upd_qq(self, request):
         redis_handler = RedisQQbot(qqacc=request.data_format.get("self_id"))
         res = redis_handler.redis_dict_get()
-        print(res)
-        print(request.data_format.get('data'))
         if res and 'data' in res:
             for item in res['data']:
                 if str(item.get('id')) == str(request.data_format.get('data').get('id')):
                     item['name'] = request.data_format.get('data').get('name')
 
-        print(res)
         redis_handler.redis_dict_insert(res)
         return None
 
