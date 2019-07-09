@@ -93,10 +93,10 @@ class PublicAPIView(viewsets.ViewSet):
         return {"data" : res} if res else {"data":[]}
 
 
-    @list_route(methods=['POST'])
+    @list_route(methods=['GET'])
     @Core_connector(pagination=True)
     def get_qq_list(self, request):
-        redis_handler = RedisQQbot(qqacc=request.data_format.get("self_id"))
+        redis_handler = RedisQQbot(qqacc=request.query_params_format.get("self_id"))
         res = redis_handler.redis_dict_get()
         return {"data":res['data'] if res and 'data' in res else []}
 
@@ -104,9 +104,15 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector()
     def upd_qq(self, request):
         redis_handler = RedisQQbot(qqacc=request.data_format.get("self_id"))
-        redis_handler.redis_dict_insert({
-            "data" : request.data_format.get('data')
-        })
+        res = redis_handler.redis_dict_get()
+        print(res)
+        if res and 'data' in res:
+            for item in res['data']:
+                if item.get('id') == request.data_format.get('data').get('id'):
+                    item = request.data_format.get('data')
+
+        print(res)
+        redis_handler.redis_dict_insert(res)
         return None
 
     @list_route(methods=['GET'])
