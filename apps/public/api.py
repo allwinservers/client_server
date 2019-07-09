@@ -99,9 +99,18 @@ class PublicAPIView(viewsets.ViewSet):
     @list_route(methods=['GET'])
     @Core_connector(pagination=True)
     def get_qq_list(self, request):
+
         redis_handler = RedisQQbot(qqacc=request.query_params_format.get("self_id"))
         res = redis_handler.redis_dict_get()
-        return {"data":res['data'] if res and 'data' in res else []}
+        if request.query_params_format.get("id"):
+            if res and 'data' in res:
+                for item in res:
+                    if str(request.query_params_format.get("id")) == str(item.get('id')):
+                        return {"data":[item]}
+        else:
+            return {"data":res['data'] if res and 'data' in res else []}
+
+        return {"data":[]}
 
     @list_route(methods=['POST'])
     @Core_connector()
@@ -113,6 +122,20 @@ class PublicAPIView(viewsets.ViewSet):
                 if str(item.get('id')) == str(request.data_format.get('data').get('id')):
                     item['name'] = request.data_format.get('data').get('name')
 
+        redis_handler.redis_dict_insert(res)
+        return None
+
+    @list_route(methods=['POST'])
+    @Core_connector()
+    def del_qq(self, request):
+        redis_handler = RedisQQbot(qqacc=request.data_format.get("self_id"))
+        res = redis_handler.redis_dict_get()
+        data=[]
+        if res and 'data' in res:
+            for item in res['data']:
+                if str(item.get('id')) != str(request.data_format.get('data').get('id')):
+                    data.append(item)
+        res['data'] = data
         redis_handler.redis_dict_insert(res)
         return None
 
