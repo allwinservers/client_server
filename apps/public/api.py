@@ -92,6 +92,23 @@ class PublicAPIView(viewsets.ViewSet):
             res  = [ item.decode()  for item in RedisQQbot().redis_get_dict_keys() ]
         return {"data" : res} if res else {"data":[]}
 
+
+    @list_route(methods=['POST'])
+    @Core_connector()
+    def get_qq_list(self, request):
+        redis_handler = RedisQQbot(qqacc=request.data.get("self_id"))
+        res = redis_handler.redis_dict_get()
+        return {"data":res['data'] if res and 'data' in res else []}
+
+    @list_route(methods=['POST'])
+    @Core_connector()
+    def upd_qq(self, request):
+        redis_handler = RedisQQbot(qqacc=request.data.get("self_id"))
+        redis_handler.redis_dict_insert({
+            "data" : request.data.get('data')
+        })
+        return None
+
     @list_route(methods=['GET'])
     @Core_connector(pagination=True)
     def get_qrtype(self, request):
