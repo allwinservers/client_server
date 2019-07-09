@@ -96,16 +96,16 @@ class PublicAPIView(viewsets.ViewSet):
     @list_route(methods=['POST'])
     @Core_connector()
     def get_qq_list(self, request):
-        redis_handler = RedisQQbot(qqacc=request.data.get("self_id"))
+        redis_handler = RedisQQbot(qqacc=request.data_format.get("self_id"))
         res = redis_handler.redis_dict_get()
         return {"data":res['data'] if res and 'data' in res else []}
 
     @list_route(methods=['POST'])
     @Core_connector()
     def upd_qq(self, request):
-        redis_handler = RedisQQbot(qqacc=request.data.get("self_id"))
+        redis_handler = RedisQQbot(qqacc=request.data_format.get("self_id"))
         redis_handler.redis_dict_insert({
-            "data" : request.data.get('data')
+            "data" : request.data_format.get('data')
         })
         return None
 
