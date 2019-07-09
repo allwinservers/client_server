@@ -133,7 +133,7 @@ class PublicAPIView(viewsets.ViewSet):
         data=[]
         if res and 'data' in res:
             for item in res['data']:
-                if str(item.get('id')) != str(request.data_format.get('data').get('id')):
+                if str(request.data_format.get('data').get('name')) in str(item.get('name')):
                     data.append(item)
         res['data'] = data
         redis_handler.redis_dict_insert(res)
