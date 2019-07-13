@@ -72,9 +72,8 @@ class PayPassLinkType(models.Model):
     to_id=models.IntegerField(default=0)
     type = models.CharField(max_length=1,verbose_name="类型:0-上游,1-下游,2-码商",default='0')
     rate = models.DecimalField(max_digits=18,decimal_places=6,default=0.000)
-    createtime = models.BigIntegerField(default=0)
-
     passid = models.BigIntegerField(default=0)
+    createtime = models.BigIntegerField(default=0)
 
     paypassname = None
     paytypename = None

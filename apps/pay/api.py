@@ -216,7 +216,6 @@ class PayAPIView(viewsets.ViewSet):
         return {"data":PayTypeModelSerializer(paytype, many=True).data}
 
 
-
     #商户费率查询
     @list_route(methods=['GET'])
     @Core_connector(pagination=True)
@@ -273,8 +272,6 @@ class PayAPIView(viewsets.ViewSet):
         userid = request.data_format['userid']
 
         return None
-
-
 
 
     @list_route(methods=['POST'])

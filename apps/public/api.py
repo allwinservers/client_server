@@ -1031,7 +1031,8 @@ class PublicAPIView(viewsets.ViewSet):
                     "iconCls": 'el-icon-s-shop',
                     "children": [
                         {"path": '/waitbn', "component": "waitbn", "name": '待审核商户'},
-                        {"path": '/bnlist', "component": "bnlist", "name": '商户列表'}
+                        {"path": '/bnlist', "component": "bnlist", "name": '商户列表'},
+                        {"path": '/bnlist_new', "component": "bnlist_new", "name": '商户列表新'}
                     ]
                 },
                 {
@@ -1373,10 +1374,6 @@ class PublicAPIView(viewsets.ViewSet):
                     ]
                 },
             ]}}
-
-
-
-
 
 from libs.core.decorator.response import Core_connector_exec
 from libs.utils.qrcode import decode_qr
