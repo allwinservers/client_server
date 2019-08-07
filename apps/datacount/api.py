@@ -294,7 +294,7 @@ class DataCountAPIView(GenericViewSetCustom):
                     "order_success_count":0,
                     "rate" : 0.0,
                     "today" : today[:10],
-                    "tech_cost" : order.tech_cost
+                    "tech_cost" : 0.0
                 }
 
             pass_order_dict[order.userid][order.paytype]['order_count'] += 1
