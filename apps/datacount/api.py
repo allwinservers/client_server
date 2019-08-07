@@ -293,13 +293,15 @@ class DataCountAPIView(GenericViewSetCustom):
                     "order_count":0,
                     "order_success_count":0,
                     "rate" : 0.0,
-                    "today" : today[:10]
+                    "today" : today[:10],
+                    "tech_cost" : order.tech_cost
                 }
 
             pass_order_dict[order.userid][order.paytype]['order_count'] += 1
             if order.status == '0':
                 pass_order_dict[order.userid][order.paytype]['amount'] += float(order.amount)
                 pass_order_dict[order.userid][order.paytype]['order_success_count'] += 1
+                pass_order_dict[order.userid][order.paytype]['tech_cost'] += float(order.tech_cost)
 
         data = []
 
@@ -309,6 +311,7 @@ class DataCountAPIView(GenericViewSetCustom):
                 pass_order_dict[userid][type]['rate'] = "{}%".format(
                     round(pass_order_dict[userid][type]['order_success_count'] * 100.0 / pass_order_dict[userid][type]['order_count'] \
                               if pass_order_dict[userid][type]['order_count'] else 0.0, 2))
+                pass_order_dict[userid][type]['endamount'] = pass_order_dict[userid][type]['amount'] - pass_order_dict[userid][type]['tech_cost']
                 data.append(pass_order_dict[userid][type])
 
         return {"data": data}
