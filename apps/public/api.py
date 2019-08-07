@@ -1155,6 +1155,7 @@ class PublicAPIView(viewsets.ViewSet):
                     "name": '财务数据',
                     "iconCls": 'el-icon-s-finance',
                     "children": [
+                        {"path": '/busicount', "component": "busicount", "name": '通道数据'},
                         {"path": '/passcount', "component": "passcount", "name": '渠道数据'},
                         {"path": '/ordercount', "component": "ordercount", "name": '每日报表'},
                         {"path": '/ballist_admin', "component": "ballist_admin", "name": '资金明细'},

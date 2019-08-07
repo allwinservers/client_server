@@ -244,3 +244,71 @@ class DataCountAPIView(GenericViewSetCustom):
             data.append(pass_order_dict[key])
 
         return {"data": data}
+
+
+    @list_route(methods=['GET'])
+    @Core_connector(pagination=True)
+    def business_count(self,request):
+
+        query_format = str()
+        query_params = list()
+
+        ut = UtilTime()
+        if request.query_params_format.get("today"):
+            today = request.query_params_format.get("today")
+            startdate = ut.string_to_timestamp(today+' 00:00:01')
+            enddate =  ut.string_to_timestamp(today+' 23:59:59')
+        else:
+            today = ut.arrow_to_string(format_v="YYYY-MM-DD")
+            startdate = ut.string_to_timestamp(today+' 00:00:01')
+            enddate = ut.string_to_timestamp(today+' 23:59:59')
+
+        query_format = query_format + " and t1.createtime>=%s and t1.createtime<=%s"
+        query_params.append(startdate)
+        query_params.append(enddate)
+
+        if request.query_params_format.get("userid"):
+            query_format = query_format + " and t2.userid =%s"
+            query_params.append(request.query_params_format.get("userid"))
+
+        orders = Order.objects.raw("""
+                SELECT t1.* FROM `order` as t1
+                INNER JOIN `user` as t2 ON t1.userid = t2.userid and t2.status='0'
+                WHERE 1=1 %s
+        """% (query_format), query_params)
+
+
+        pass_order_dict={}
+        for order in orders :
+
+            if order.userid not in pass_order_dict:
+                pass_order_dict[order.userid] = dict()
+
+            if order.paytype not in pass_order_dict[order.userid]:
+                pass_order_dict[order.userid][order.paytype]={
+                    "id": order.userid,
+                    "typeid" : order.paytype,
+                    "name" : order.paytypename,
+                    "amount" : 0.0,
+                    "order_count":0,
+                    "order_success_count":0,
+                    "rate" : 0.0,
+                    "today" : today[:10]
+                }
+
+            pass_order_dict[order.userid][order.paytype]['order_count'] += 1
+            if order.status == '0':
+                pass_order_dict[order.userid][order.paytype]['amount'] += float(order.amount)
+                pass_order_dict[order.userid][order.paytype]['order_success_count'] += 1
+
+        data = []
+
+        for userid in pass_order_dict:
+            for type in pass_order_dict[userid]:
+
+                pass_order_dict[userid][type]['rate'] = "{}%".format(
+                    round(pass_order_dict[userid][type]['order_success_count'] * 100.0 / pass_order_dict[userid][type]['order_count'] \
+                              if pass_order_dict[userid][type]['order_count'] else 0.0, 2))
+                data.append(pass_order_dict[userid][type])
+
+        return {"data": data}
