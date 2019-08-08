@@ -12,12 +12,12 @@ def get_user(request):
 
     token = request.META.get('HTTP_AUTHORIZATION')
     if not token:
-        return (None,'token不存在,请退出后重新登录！', 200, ResCode.Token_Missing)
+        return (None,'token不存在,请退出后重新登录！', 200, ResCode.TOKEN_NOT)
 
     try:
         result=Token.objects.get(key=token)
     except Token.DoesNotExist:
-        return (None,'token已失效,请退出后重新登录！', 200, ResCode.Token_Missing)
+        return (None,'token已失效,请退出后重新登录！', 200, ResCode.TOKEN_NOT)
 
     user=Users.objects.get(userid=result.userid)
     user.rolename = Role.objects.get(rolecode=user.rolecode).name
