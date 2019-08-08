@@ -39,6 +39,28 @@ class PayAPIView(viewsets.ViewSet):
         paycall.order_obj.save()
         return None
 
+    @list_route(methods=['POST'])
+    @Core_connector(transaction=True)
+    def callback_business_ex(self,request, *args, **kwargs):
+
+        orders = request.data_format.get("orders")
+
+        error = ""
+        for ordercode in orders:
+            try:
+                order = Order.objects.select_for_update().get(ordercode=ordercode,down_status='2')
+            except Order.DoesNotExist:
+                error += "{},".format(ordercode)
+                continue
+
+            paycall = PayCallBase(amount=order.amount)
+            paycall.order_obj = order
+            paycall.callback_request_to_server()
+            paycall.order_obj.save()
+        if len(error):
+           error = "以下订单号[{}]，状态不正确，不能通知！".format(error[:-1])
+        return {"data":{"error":error}}
+
     @list_route(methods=['GET'])
     @Core_connector()
     def paytype_get(self,request, *args, **kwargs):
