@@ -1077,35 +1077,35 @@ class PublicAPIView(viewsets.ViewSet):
                         {"path": '/orderlist', "component": "orderlist", "name": '订单列表'}
                     ]
                 },
-                {
-                    "path": '/cqmanage',
-                    "component": "Home",
-                    "name": '码商管理',
-                    "iconCls": 'el-icon-user-solid',
-                    "children": [
-                        {"path": '/codequotient', "component": "codequotient", "name": '码商维护'}
-                    ]
-                },
-                {
-                    "path": '/wechathelpermanage',
-                    "component": "Home",
-                    "name": '店员助手管理',
-                    "iconCls": 'el-icon-coffee',
-                    "children": [
-                        {"path": '/wechathelper', "component": "wechathelper", "name": '店员助手维护'}
-                    ]
-                },
-                {
-                    "path": '/qrcode',
-                    "component": "Home",
-                    "name": '二维码管理',
-                    "iconCls": 'el-icon-picture',
-                    "children": [
-                        {"path": '/qr_code_pool', "component": "qr_code_pool", "name": '二维码新增'},
-                        {"path": '/qrcode_pools', "component": "qrcode_pools", "name": '二维码列表',
-                         "query": {"id": "id","wechathelper_id":"wechathelper_id"}}
-                    ]
-                },
+                # {
+                #     "path": '/cqmanage',
+                #     "component": "Home",
+                #     "name": '码商管理',
+                #     "iconCls": 'el-icon-user-solid',
+                #     "children": [
+                #         {"path": '/codequotient', "component": "codequotient", "name": '码商维护'}
+                #     ]
+                # },
+                # {
+                #     "path": '/wechathelpermanage',
+                #     "component": "Home",
+                #     "name": '店员助手管理',
+                #     "iconCls": 'el-icon-coffee',
+                #     "children": [
+                #         {"path": '/wechathelper', "component": "wechathelper", "name": '店员助手维护'}
+                #     ]
+                # },
+                # {
+                #     "path": '/qrcode',
+                #     "component": "Home",
+                #     "name": '二维码管理',
+                #     "iconCls": 'el-icon-picture',
+                #     "children": [
+                #         {"path": '/qr_code_pool', "component": "qr_code_pool", "name": '二维码新增'},
+                #         {"path": '/qrcode_pools', "component": "qrcode_pools", "name": '二维码列表',
+                #          "query": {"id": "id","wechathelper_id":"wechathelper_id"}}
+                #     ]
+                # },
             ]}}
         elif request.user.rolecode in ["1001"]:
             return {"data": {"router": [
@@ -1170,9 +1170,9 @@ class PublicAPIView(viewsets.ViewSet):
                     "children": [
                         {"path": '/paypass', "component": "paypass", "name": '支付渠道'},
                         {"path": '/paytype', "component": "paytype", "name": '支付方式'},
-                        {"path": '/up_cashout', "component": "up_cashout", "name": '提现申请(码商)'},
-                        {"path": '/upcashoutlist_ss', "component": "upcashoutlist_ss", "name": '提现申请记录(码商)'},
-                        {"path": '/upcashoutlist', "component": "upcashoutlist", "name": '打款记录(码商)'},
+                        # {"path": '/up_cashout', "component": "up_cashout", "name": '提现申请(码商)'},
+                        # {"path": '/upcashoutlist_ss', "component": "upcashoutlist_ss", "name": '提现申请记录(码商)'},
+                        # {"path": '/upcashoutlist', "component": "upcashoutlist", "name": '打款记录(码商)'},
                         {"path": '/cashoutlist_admin', "component": "cashoutlist_admin", "name": '提现申请审核(下游)'},
                         {"path": '/cashoutlist1', "component": "cashoutlist1", "name": '打款记录(下游)'},
                     ]
@@ -1186,35 +1186,35 @@ class PublicAPIView(viewsets.ViewSet):
                         {"path": '/orderlist', "component": "orderlist", "name": '订单列表'}
                     ]
                 },
-                {
-                    "path": '/cqmanage',
-                    "component": "Home",
-                    "name": '码商管理',
-                    "iconCls": 'el-icon-user-solid',
-                    "children": [
-                        {"path": '/codequotient', "component": "codequotient", "name": '码商维护'}
-                    ]
-                },
-                {
-                    "path": '/wechathelpermanage',
-                    "component": "Home",
-                    "name": '店员助手管理',
-                    "iconCls": 'el-icon-coffee',
-                    "children": [
-                        {"path": '/wechathelper', "component": "wechathelper", "name": '店员助手维护'}
-                    ]
-                },
-                {
-                    "path": '/qrcode',
-                    "component": "Home",
-                    "name": '二维码管理',
-                    "iconCls": 'el-icon-picture',
-                    "children": [
-                        {"path": '/qr_code_pool', "component": "qr_code_pool", "name": '二维码新增'},
-                        {"path": '/qrcode_pools', "component": "qrcode_pools", "name": '二维码列表',
-                         "query": {"id": "id","wechathelper_id":"wechathelper_id"}}
-                    ]
-                },
+                # {
+                #     "path": '/cqmanage',
+                #     "component": "Home",
+                #     "name": '码商管理',
+                #     "iconCls": 'el-icon-user-solid',
+                #     "children": [
+                #         {"path": '/codequotient', "component": "codequotient", "name": '码商维护'}
+                #     ]
+                # },
+                # {
+                #     "path": '/wechathelpermanage',
+                #     "component": "Home",
+                #     "name": '店员助手管理',
+                #     "iconCls": 'el-icon-coffee',
+                #     "children": [
+                #         {"path": '/wechathelper', "component": "wechathelper", "name": '店员助手维护'}
+                #     ]
+                # },
+                # {
+                #     "path": '/qrcode',
+                #     "component": "Home",
+                #     "name": '二维码管理',
+                #     "iconCls": 'el-icon-picture',
+                #     "children": [
+                #         {"path": '/qr_code_pool', "component": "qr_code_pool", "name": '二维码新增'},
+                #         {"path": '/qrcode_pools', "component": "qrcode_pools", "name": '二维码列表',
+                #          "query": {"id": "id","wechathelper_id":"wechathelper_id"}}
+                #     ]
+                # },
             ]}}
         elif request.user.rolecode in ["2001"]:
             return { "data" : {"router" : [
