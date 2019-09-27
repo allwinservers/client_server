@@ -689,7 +689,7 @@ class PublicAPIView(viewsets.ViewSet):
     def cashout_cancel(self, request, *args, **kwargs):
 
         try:
-            cashlist = CashoutList.objects.get(id=self.request.data_format.get('id'))
+            cashlist = CashoutList.objects.select_for_update().get(id=self.request.data_format.get('id'))
         except CashoutList.DoesNotExist:
             raise PubErrorCustom("此纪录不存在!")
 
