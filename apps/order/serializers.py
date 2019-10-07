@@ -55,6 +55,7 @@ class CashoutListModelSerializer(serializers.ModelSerializer):
     createtime = serializers.SerializerMethodField()
 
     updtime = serializers.SerializerMethodField()
+    amount = serializers.DecimalField(max_digits=18, decimal_places=2)
 
     def get_status_name(self,obj):
         if obj.status == "0" :
