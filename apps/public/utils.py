@@ -5,6 +5,38 @@ from django_redis import get_redis_connection
 from libs.utils.http_request import send_request
 from utils.exceptions import PubErrorCustom
 
+from apps.cache.utils import RedisCaCheHandler
+
+
+def check_df_ip(userid,ip):
+    print(userid,ip)
+
+    data = RedisCaCheHandler(
+        method="filter",
+        serialiers="WhiteListModelSerializerToRedis",
+        table="whitelist",
+        filter_value={
+            "userid": userid
+        }
+    ).run()
+
+    if not len(data):
+        raise PubErrorCustom("拒绝访问!")
+
+    isIpValid = False
+    for item in data[0].split(','):
+        print(item)
+        print(ip)
+        if str(item['dfobj']) == str(ip):
+            isIpValid = True
+            break
+
+    if not isIpValid:
+        raise PubErrorCustom("拒绝访问!")
+
+
+
+
 def get_sysparam():
     return Sysparam.objects.get()
 

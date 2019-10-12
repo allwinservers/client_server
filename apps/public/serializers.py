@@ -6,11 +6,25 @@ from apps.user.models import Users,Login
 from django.utils import timezone
 from rest_framework.validators import UniqueTogetherValidator
 
-from apps.public.models import Qrcode,WechatHelper
+from apps.public.models import Qrcode,WechatHelper,WhiteList
 from apps.paycall.models import PayCallList
 
 from libs.utils.mytime import timestamp_toTime,UtilTime
 
+
+class WhiteListModelSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = WhiteList
+		fields = '__all__'
+
+		validators = [
+			UniqueTogetherValidator(
+				queryset=WhiteList.objects.all(),
+				fields=('userid',),
+				message="用户不能重复添加!"
+			),
+		]
 
 class WechatHelperModelSerializer(serializers.ModelSerializer):
 	status_name = serializers.SerializerMethodField()

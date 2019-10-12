@@ -14,6 +14,7 @@ ServerUrl = os.environ.get('SERVERURL', 'localhost:8000')
 INSTALLED_APPS_CUSTOM = [
     'apps.user',
     'apps.order',
+    'apps.cache',
     'apps.public',
     'apps.pay',
     'apps.datacount',

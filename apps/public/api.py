@@ -10,7 +10,7 @@ from apps.user.models import Login,Users,Role,UserLink,BalList
 from apps.user.serializers import UsersSerializer1,WaitbnSerializer,AgentSerializer,BusinessSerializer,UsersSerializer,BankInfoSerializer
 from apps.pay.serializers import PayPassModelSerializer
 from auth.authentication import Authentication
-
+from apps.public.utils import check_df_ip
 from apps.pay.models import PayPass
 
 from libs.utils.mytime import timestamp_toTime,UtilTime
@@ -43,10 +43,101 @@ from include.data.choices_list import Choices_to_Dict
 from libs.utils.google_auth import check_google_token
 from apps.utils import RedisQQbot
 
+from apps.cache.utils import RedisCaCheHandler
+from apps.public.models import WhiteList
+from apps.public.serializers import WhiteListModelSerializer
+
 class PublicAPIView(viewsets.ViewSet):
 
     def get_authenticators(self):
         return [auth() for auth in [Authentication]]
+
+
+    #刷新所有支付方式缓存数据
+    @list_route(methods=['POST'])
+    @Core_connector()
+    def refeshWhiteList(self,request, *args, **kwargs):
+
+        RedisCaCheHandler(
+            method="insertAll",
+            serialiers="WhiteListModelSerializerToRedis",
+            table="whitelist",
+            filter_value=WhiteList.objects.filter(),
+            must_key="userid",
+        ).run()
+
+        return None
+
+    #添加用户
+    @list_route(methods=['POST'])
+    @Core_connector(transaction=True, serializer_class=WhiteListModelSerializer, model_class=WhiteList)
+    def addWhiteList(self,request,*args, **kwargs):
+
+        serializer = kwargs.pop('serializer')
+        isinstance = serializer.save()
+
+        RedisCaCheHandler(
+            method="save",
+            serialiers="WhiteListModelSerializerToRedis",
+            table="whitelist",
+            filter_value=isinstance,
+            must_key="userid",
+        ).run()
+
+        return None
+
+    #修改用户
+    @list_route(methods=['POST'])
+    @Core_connector(transaction=True)
+    def updWhiteList(self,request,*args, **kwargs):
+
+
+        serializer=WhiteListModelSerializer(WhiteList.objects.get(userid=request.data_format.get("userid")),data=request.data_format)
+        serializer.is_valid(raise_exception=True)
+        userObj = serializer.save()
+
+        RedisCaCheHandler(
+            method="save",
+            serialiers="WhiteListModelSerializerToRedis",
+            table="whitelist",
+            filter_value=userObj,
+            must_key="userid",
+        ).run()
+
+        return None
+
+    #删除用户
+    @list_route(methods=['POST'])
+    @Core_connector(transaction=True)
+    def delWhiteList(self,request,*args, **kwargs):
+
+        userid = request.data_format.get('userid')
+
+
+        WhiteList.objects.filter(userid=userid).delete()
+
+
+        RedisCaCheHandler(
+            method="delete",
+            table="whitelist",
+            must_key_value=userid).run()
+
+
+        return None
+
+    #查询用户
+    @list_route(methods=['GET'])
+    @Core_connector(pagination=True)
+    def getWhiteList(self,request,*args, **kwargs):
+
+        data =RedisCaCheHandler(
+            method="filter",
+            serialiers="WhiteListModelSerializerToRedis",
+            table="whitelist",
+            filter_value=request.query_params_format
+        ).run()
+
+        return {"data":data}
 
     @list_route(methods=['POST'])
     @Core_connector()
@@ -673,6 +764,8 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector()
     def daifuPassList(self,request, *args, **kwargs):
 
+        check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
+
         QueryObj=PayPass.objects.filter(status__in=[0, 1],isdayfu='0')
 
         if request.query_params_format.get("id"):
@@ -683,6 +776,8 @@ class PublicAPIView(viewsets.ViewSet):
     @list_route(methods=['POST'])
     @Core_connector(transaction=True)
     def daifuBalTixian(self,request, *args, **kwargs):
+
+        check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
 
         print(request.data_format)
 
@@ -735,6 +830,8 @@ class PublicAPIView(viewsets.ViewSet):
     @list_route(methods=['GET'])
     @Core_connector()
     def daifuBalQuery(self,request, *args, **kwargs):
+
+        check_df_ip(request.user.userid,request.META.get("HTTP_X_REAL_IP"))
 
         if str(request.query_params_format.get("paypassid")) == '54':
 
@@ -1162,6 +1259,16 @@ class PublicAPIView(viewsets.ViewSet):
                     "iconCls": 'el-icon-s-order',
                     "children": [
                         {"path": '/orderlist', "component": "orderlist", "name": '订单列表'}
+                    ]
+                },
+                {
+                    "path": '/sys',
+                    "component": "Home",
+                    "name": '系统管理',
+                    "iconCls": 'el-icon-s-order',
+                    "children": [
+                        {"path": '/whitelist', "component": "whitelist", "name": '白名单管理'},
+                        {"path": '/cache', "component": "cache", "name": '缓存管理'}
                     ]
                 },
                 # {
