@@ -202,7 +202,7 @@ class OrderAPIView(GenericViewSetCustom):
         else:
             raise PubErrorCustom("用户类型有误!")
 
-        return {"data": CashoutListModelSerializer(QuerySet.filter(status="0",paypassid__gt=0).order_by('-createtime'),many=True).data}
+        return {"data": CashoutListModelSerializer(QuerySet.filter(paypassid__gt=0).order_by('-createtime'),many=True).data}
 
     @list_route(methods=['GET'])
     @Core_connector(pagination=True)
