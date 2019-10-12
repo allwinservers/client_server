@@ -24,10 +24,10 @@ def check_df_ip(userid,ip):
         raise PubErrorCustom("拒绝访问!")
 
     isIpValid = False
-    for item in data[0].split(','):
+    for item in data[0]['dfobj'].split(','):
         print(item)
         print(ip)
-        if str(item['dfobj']) == str(ip):
+        if str(item) == str(ip):
             isIpValid = True
             break
 
