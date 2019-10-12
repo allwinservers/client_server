@@ -175,7 +175,7 @@ class OrderAPIView(GenericViewSetCustom):
 
         QuerySet = CashoutList.objects.all()
 
-        if self.request.user.rolecode in ["1000","1001"]:
+        if self.request.user.rolecode in ["1000","1001","1005"]:
             pass
         elif self.request.user.rolecode == '2001':
             QuerySet = QuerySet.filter(userid=self.request.user.userid)
@@ -188,7 +188,21 @@ class OrderAPIView(GenericViewSetCustom):
         else:
             raise PubErrorCustom("用户类型有误!")
 
-        return {"data": CashoutListModelSerializer(QuerySet.filter(status="0").order_by('-createtime'),many=True).data}
+        return {"data": CashoutListModelSerializer(QuerySet.filter(status="0",paypassid=0).order_by('-createtime'),many=True).data}
+
+
+    @list_route(methods=['GET'])
+    @Core_connector(pagination=True)
+    def cashoutlist_df_query(self, request, *args, **kwargs):
+
+        QuerySet = CashoutList.objects.all()
+
+        if self.request.user.rolecode in ["1005"]:
+            pass
+        else:
+            raise PubErrorCustom("用户类型有误!")
+
+        return {"data": CashoutListModelSerializer(QuerySet.filter(status="0",paypassid__gt=0).order_by('-createtime'),many=True).data}
 
     @list_route(methods=['GET'])
     @Core_connector(pagination=True)
@@ -205,7 +219,7 @@ class OrderAPIView(GenericViewSetCustom):
 
         QuerySet = CashoutList.objects.all()
 
-        if self.request.user.rolecode in ["1000","1001"]:
+        if self.request.user.rolecode in ["1000","1001","1005"]:
             pass
         elif self.request.user.rolecode == '2001':
             QuerySet = QuerySet.filter(userid=self.request.user.userid)
@@ -218,7 +232,7 @@ class OrderAPIView(GenericViewSetCustom):
         else:
             raise PubErrorCustom("用户类型有误!")
 
-        return {"data": CashoutListModelSerializer(QuerySet.filter(status__in=["1","2"]).order_by('-updtime'),many=True).data}
+        return {"data": CashoutListModelSerializer(QuerySet.filter(status__in=["1","2"],paypassid=0).order_by('-updtime'),many=True).data}
 
 
     @list_route(methods=['GET'])
@@ -227,7 +241,7 @@ class OrderAPIView(GenericViewSetCustom):
 
         QuerySet = UpCashoutList.objects.all()
 
-        if self.request.user.rolecode in ["1000","1001"]:
+        if self.request.user.rolecode in ["1000","1001","1005"]:
             pass
         elif self.request.user.rolecode == '4001':
             QuerySet = QuerySet.filter(userid_to=self.request.user.userid)
@@ -242,7 +256,7 @@ class OrderAPIView(GenericViewSetCustom):
 
         QuerySet = UpCashoutList.objects.all()
 
-        if self.request.user.rolecode in ["1000", "1001"]:
+        if self.request.user.rolecode in ["1000", "1001","1005"]:
             pass
         elif self.request.user.rolecode == '4001':
             QuerySet = QuerySet.filter(userid_to=self.request.user.userid)

@@ -14,6 +14,8 @@ def url_join(path=None):
 
 def upd_bal(**kwargs):
 
+    user = kwargs.get('user',None)
+
     userid = kwargs.get('userid',None)
     bal = kwargs.get('bal',None)
     cashout_bal = kwargs.get('cashout_bal',None)
@@ -28,10 +30,11 @@ def upd_bal(**kwargs):
 
     memo = kwargs.get("memo","修改余额")
 
-    try:
-        user = Users.objects.select_for_update().get(userid=userid)
-    except Users.DoesNotExist:
-        raise PubErrorCustom("无对应用户信息({})".format(userid))
+    if not user:
+        try:
+            user = Users.objects.select_for_update().get(userid=userid)
+        except Users.DoesNotExist:
+            raise PubErrorCustom("无对应用户信息({})".format(userid))
 
     if bal :
         BalList.objects.create(**{

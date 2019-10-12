@@ -28,7 +28,15 @@ class PayPassModelSerializer(serializers.ModelSerializer):
     bal = serializers.DecimalField(max_digits=18,decimal_places=2)
 
     status_name = serializers.SerializerMethodField()
+    isdayfu_name = serializers.SerializerMethodField()
 
+
+    def get_isdayfu_name(self,obj):
+
+        if str(obj.isdayfu) == '0':
+            return "是"
+        else:
+            return "否"
 
     def get_status_name(self,obj):
         if str(obj.status) == '0':

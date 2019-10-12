@@ -56,6 +56,12 @@ class CashoutListModelSerializer(serializers.ModelSerializer):
 
     updtime = serializers.SerializerMethodField()
     amount = serializers.DecimalField(max_digits=18, decimal_places=2)
+    ordercode = serializers.SerializerMethodField()
+
+
+    def get_ordercode(self,obj):
+
+        return "DF%08d%s" % (obj.userid, obj.downordercode),
 
     def get_status_name(self,obj):
         if obj.status == "0" :

@@ -51,6 +51,8 @@ class PayPass(models.Model):
     createtime = models.BigIntegerField(default=0)
     bal = models.DecimalField(max_digits=18,decimal_places=6,default=0.00)
 
+    isdayfu = models.CharField(max_length=1,verbose_name="是否代付,0-是,1-不是",default='1')
+
     pays=None
     paytypes=None
     status_name=None
