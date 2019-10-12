@@ -3830,7 +3830,7 @@ class LastPass_BAWANGKUAIJIE(LastPassBase):
         if str(res['REP_BODY']['rspcode']) != '000000':
             raise PubErrorCustom(self.hexStringTobytes(res['REP_BODY']['rspmsg']).decode('utf-8'))
 
-        return None
+        return res
 
 
 
