@@ -46,7 +46,7 @@ class DataCountAPIView(GenericViewSetCustom):
         #流水统计,订单比数统计,成功率
         QuerySet = Order.objects.all()
 
-        if self.request.user.rolecode in ["1000","1001"]:
+        if self.request.user.rolecode in ["1000","1001","1005"]:
             pass
         elif self.request.user.rolecode == '2001':
             QuerySet = QuerySet.filter(userid=self.request.user.userid)
