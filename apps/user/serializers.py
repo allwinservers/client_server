@@ -147,14 +147,14 @@ class BusinessSerializer(serializers.Serializer):
         return PayTypeModelSerializer(paytype, many=True).data
 
     def get_today_amount(self,obj):
-        tot = 0
-        ut = UtilTime()
-        today = ut.arrow_to_string(ut.today, format_v="YYYY-MM-DD")
-        today_start = ut.string_to_timestamp(today + ' 00:00:01')
-        today_end = ut.string_to_timestamp(today + ' 23:59:59')
-        for item in Order.objects.filter(userid=obj.userid, createtime__lte=today_end, createtime__gte=today_start,
-                                               status="0"):
-            tot = float(tot) + float(item.amount)
+        # tot = 0
+        # ut = UtilTime()
+        # today = ut.arrow_to_string(ut.today, format_v="YYYY-MM-DD")
+        # today_start = ut.string_to_timestamp(today + ' 00:00:01')
+        # today_end = ut.string_to_timestamp(today + ' 23:59:59')
+        # for item in Order.objects.filter(userid=obj.userid, createtime__lte=today_end, createtime__gte=today_start,
+        #                                        status="0"):
+        #     tot = float(tot) + float(item.amount)
         return 0.0
 
     def get_bal1(self,obj):
