@@ -155,7 +155,7 @@ class BusinessSerializer(serializers.Serializer):
         for item in Order.objects.filter(userid=obj.userid, createtime__lte=today_end, createtime__gte=today_start,
                                                status="0"):
             tot = float(tot) + float(item.amount)
-        return tot
+        return 0.0
 
     def get_bal1(self,obj):
         return round(float(obj.bal)-float(obj.cashout_bal),2)
