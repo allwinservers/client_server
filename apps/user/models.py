@@ -69,12 +69,25 @@ class Users(models.Model):
     paypassid =  models.BigIntegerField(verbose_name="上游支付渠道ID",default=0)
 
     bal = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="余额")
-    cashout_bal = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="提现金额")
+    cashout_bal = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="提现余额")
+
+    upd_bal_date = models.CharField(max_length=8,verbose_name="动账日期",default="")
+
+    stop_bal = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="冻结余额")
+
+    lastday_bal = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="昨日余额")
+    today_bal = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="今日余额")
+
+    lastday_pay_amount = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="昨日充值")
+    today_pay_amount = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="今日充值")
+    tot_pay_amount = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="总充值")
+
+    lastday_cashout_amount = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="昨日提现")
+    today_cashout_amount = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="今日提现")
+    tot_cashout_amount = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="总提现")
 
     up_bal = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="码商流水")
-
     google_token = models.CharField(max_length=60,verbose_name="google_token",default="")
-
 
     rolename  = None
     level = None
