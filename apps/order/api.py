@@ -18,6 +18,7 @@ from utils.exceptions import PubErrorCustom
 from apps.user.models import UserLink
 from apps.utils import RedisOrderCount
 
+import json
 from apps.order.utils import get_today_start_end_time
 
 from apps.paycall.utils import PayCallFlm,PayCallWechat,PayCallLastPass,PayCallBase,PayCallNxys,PayCallJyys,PayCallZjnx,PayCallYzf
@@ -131,32 +132,21 @@ class OrderAPIView(GenericViewSetCustom):
         if self.request.data_format.get("orders") and len(self.request.data_format.get("orders"))>1:
             raise PubErrorCustom("手工上分只允许单笔操作!")
 
-        if len(self.request.data_format.get("orders")):
-            try:
-                order=Order.objects.select_for_update().get(ordercode=self.request.data_format.get("orders")[0])
-            except Order.DoesNotExist:
-                raise PubErrorCustom("订单号不存在!")
+        request_data = {
+            "orderid": self.request.data_format.get("orders")[0]
+        }
 
-            if order.status == '0':
-                raise PubErrorCustom("请勿重复补单!")
-        else:
-            raise PubErrorCustom("订单号不能为空")
+        result = request('POST',
+                         url='http://allwin6666.com/callback_api/lastpass/shougonghandler_callback',
+                         data=request_data,
+                         json=request_data, verify=False)
 
-        if order.paypass in (0, 1):
-            if order.qr_type == 'QR001':
-                PayCallWechat().handwork_run(order=order)
-            elif order.qr_type == 'QR005':
-                PayCallFlm().handwork_run(order=order)
-            elif order.qr_type == 'QR010':
-                PayCallNxys().handwork_run(order=order)
-            elif order.qr_type == 'QR015':
-                PayCallJyys().handwork_run(order=order)
-            elif order.qr_type == 'QR020':
-                PayCallZjnx().handwork_run(order=order)
-            elif order.qr_type == 'QR025':
-                PayCallYzf().handwork_run(order=order)
-        else:
-            PayCallLastPass().handwork_run(order=order)
+        res = json.loads(result.content.decode('utf-8'))
+
+        if res['rescode'] != '10000':
+            raise PubErrorCustom(res['msg'])
+
+        return None
 
 
     @list_route(methods=['POST'])
