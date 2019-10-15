@@ -12,50 +12,50 @@ class GenericViewSetCustom(viewsets.ViewSet):
 def url_join(path=None):
     return "{}{}".format(ServerUrl,path) if path else ServerUrl
 
-def upd_bal(**kwargs):
-
-    user = kwargs.get('user',None)
-
-    userid = kwargs.get('userid',None)
-    bal = kwargs.get('bal',None)
-    cashout_bal = kwargs.get('cashout_bal',None)
-    up_bal = kwargs.get('up_bal',None)
-
-    if bal:
-        bal=float(bal)
-    if cashout_bal:
-        cashout_bal=float(cashout_bal)
-    if up_bal:
-        up_bal = float(up_bal)
-
-    memo = kwargs.get("memo","修改余额")
-
-    if not user:
-        try:
-            user = Users.objects.select_for_update().get(userid=userid)
-        except Users.DoesNotExist:
-            raise PubErrorCustom("无对应用户信息({})".format(userid))
-
-    if bal :
-        BalList.objects.create(**{
-            "userid" : user.userid,
-            "amount" : bal,
-            "bal" : user.bal,
-            "confirm_bal" : float(user.bal) + float(bal),
-            "memo" : memo,
-            "ordercode":  kwargs.get("ordercode",0)
-        })
-        user.bal = float(user.bal) + float(bal)
-
-    if cashout_bal:
-        user.cashout_bal = float(user.cashout_bal) + float(cashout_bal)
-
-    if up_bal:
-        user.up_bal = float(user.up_bal) + float(up_bal)
-
-    user.save()
-
-    return user
+# def upd_bal(**kwargs):
+#
+#     user = kwargs.get('user',None)
+#
+#     userid = kwargs.get('userid',None)
+#     bal = kwargs.get('bal',None)
+#     cashout_bal = kwargs.get('cashout_bal',None)
+#     up_bal = kwargs.get('up_bal',None)
+#
+#     if bal:
+#         bal=float(bal)
+#     if cashout_bal:
+#         cashout_bal=float(cashout_bal)
+#     if up_bal:
+#         up_bal = float(up_bal)
+#
+#     memo = kwargs.get("memo","修改余额")
+#
+#     if not user:
+#         try:
+#             user = Users.objects.select_for_update().get(userid=userid)
+#         except Users.DoesNotExist:
+#             raise PubErrorCustom("无对应用户信息({})".format(userid))
+#
+#     if bal :
+#         BalList.objects.create(**{
+#             "userid" : user.userid,
+#             "amount" : bal,
+#             "bal" : user.bal,
+#             "confirm_bal" : float(user.bal) + float(bal),
+#             "memo" : memo,
+#             "ordercode":  kwargs.get("ordercode",0)
+#         })
+#         user.bal = float(user.bal) + float(bal)
+#
+#     if cashout_bal:
+#         user.cashout_bal = float(user.cashout_bal) + float(cashout_bal)
+#
+#     if up_bal:
+#         user.up_bal = float(user.up_bal) + float(up_bal)
+#
+#     user.save()
+#
+#     return user
 
 class RedisHandler(object):
     def __init__(self,**kwargs):

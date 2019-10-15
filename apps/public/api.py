@@ -25,12 +25,13 @@ from include.data.redislockkey import PAY_SELF_UPD_BAL,PAY_ADMIN_UPD_BAL,LOAD_QR
 
 from apps.public.models import Qrcode,WechatHelper
 
-from apps.utils import upd_bal,url_join
+from apps.utils import url_join
 from include.data.choices_list import Choices_to_Dict
 from libs.utils.google_auth import create_google_token
 
 from apps.lastpass.utils import LastPass_BAWANGKUAIJIE
 
+from apps.account import AccountCashout,AccountCashoutCanle,AccountCashoutConfirm
 import time
 import os
 import subprocess
@@ -712,7 +713,9 @@ class PublicAPIView(viewsets.ViewSet):
         if self.request.data_format.get("amount")<=0 :
             raise PubErrorCustom("请输入正确的提现金额!")
 
-        user = upd_bal(userid=self.request.user.userid,cashout_bal = self.request.data_format.get("amount"))
+        # user = upd_bal(userid=self.request.user.userid,cashout_bal = self.request.data_format.get("amount"))
+
+        user = AccountCashout(userid=self.request.user.userid,amount=self.request.data_format.get("amount")).run()
 
         CashoutList.objects.create(**{
             "userid" : self.request.user.userid ,
@@ -863,7 +866,9 @@ class PublicAPIView(viewsets.ViewSet):
         cashlist.updtime = time.mktime(timezone.now().timetuple())
         cashlist.save()
 
-        upd_bal(userid=self.request.data_format.get("userid"),cashout_bal = cashlist.amount*-1,bal=cashlist.amount*-1,memo="提现")
+        # upd_bal(userid=self.request.data_format.get("userid"),cashout_bal = cashlist.amount*-1,bal=cashlist.amount*-1,memo="提现")
+
+        AccountCashoutConfirm(userid=self.request.data_format.get("userid"), amount=cashlist.amount).run()
 
         return None
 
@@ -881,92 +886,93 @@ class PublicAPIView(viewsets.ViewSet):
         cashlist.updtime = time.mktime(timezone.now().timetuple())
         cashlist.save()
 
-        upd_bal(userid=self.request.data_format.get("userid"),cashout_bal = cashlist.amount*-1)
+        # upd_bal(userid=self.request.data_format.get("userid"),cashout_bal = cashlist.amount*-1)
+        AccountCashoutCanle(userid=self.request.data_format.get("userid"), amount=cashlist.amount).run()
 
         return None
 
         # 提现申请
 
-    @list_route(methods=['POST'])
-    @Core_connector(transaction=True)
-    def up_cashout(self, request, *args, **kwargs):
-        if not self.request.data_format.get("bank"):
-            raise PubErrorCustom("请选择银行卡信息!")
-
-        if not self.request.data_format.get("userid"):
-            raise PubErrorCustom("码商ID不能为空!")
-
-        if not self.request.data_format.get("pay_passwd"):
-            raise PubErrorCustom("请输入支付密码!")
-        if self.request.data_format.get("pay_passwd") != self.request.user.pay_passwd:
-            raise PubErrorCustom("支付密码错误!")
-
-        try:
-            user = Users.objects.get(userid=self.request.data_format.get("userid"))
-        except Users.DoesNotExist:
-            raise PubErrorCustom("码商ID不存在!")
-
-        if float(user.up_bal) - float(user.bal) - float(user.cashout_bal) < self.request.data_format.get("amount"):
-            raise PubErrorCustom("可提余额不足!")
-
-        if self.request.data_format.get("amount") <= 0:
-            raise PubErrorCustom("请输入正确的提现金额!")
-
-        user = upd_bal(userid=user.userid, cashout_bal=self.request.data_format.get("amount"))
-
-        UpCashoutList.objects.create(**{
-            "userid": self.request.user.userid,
-            "name": self.request.user.name,
-            "userid_to" : user.userid,
-            "name_to" : user.name,
-            "amount": self.request.data_format.get("amount"),
-            "bank_name": self.request.data_format.get("bank")['bank_name'],
-            "open_name": self.request.data_format.get("bank")['open_name'],
-            "open_bank": self.request.data_format.get("bank")['open_bank'],
-            "bank_card_number": self.request.data_format.get("bank")['bank_card_number'],
-            "status": "0"
-        })
-        return {"data":{
-            "bal":user.bal,
-            "up_bal" : user.up_bal,
-            "cashout_bal" : user.cashout_bal
-        }}
-
-    #提现通过
-    @list_route(methods=['POST'])
-    @Core_connector(transaction=True)
-    def up_cashout_confirm(self,request, *args, **kwargs):
-
-        try:
-            cashlist = UpCashoutList.objects.select_for_update().get(id=self.request.data_format.get('id'),status=0)
-        except CashoutList.DoesNotExist:
-            raise PubErrorCustom("此纪录不存在!")
-
-        cashlist.status = '1'
-        cashlist.updtime = time.mktime(timezone.now().timetuple())
-        cashlist.save()
-
-        upd_bal(userid=cashlist.userid_to,cashout_bal = cashlist.amount*-1,up_bal=cashlist.amount*-1,memo="提现")
-
-        return None
-
-    # 提现拒绝
-    @list_route(methods=['POST'])
-    @Core_connector(transaction=True)
-    def up_cashout_cancel(self, request, *args, **kwargs):
-
-        try:
-            cashlist = UpCashoutList.objects.get(id=self.request.data_format.get('id'))
-        except CashoutList.DoesNotExist:
-            raise PubErrorCustom("此纪录不存在!")
-
-        cashlist.status = '2'
-        cashlist.updtime = time.mktime(timezone.now().timetuple())
-        cashlist.save()
-
-        upd_bal(userid=cashlist.userid_to,cashout_bal = cashlist.amount*-1)
-
-        return None
+    # @list_route(methods=['POST'])
+    # @Core_connector(transaction=True)
+    # def up_cashout(self, request, *args, **kwargs):
+    #     if not self.request.data_format.get("bank"):
+    #         raise PubErrorCustom("请选择银行卡信息!")
+    #
+    #     if not self.request.data_format.get("userid"):
+    #         raise PubErrorCustom("码商ID不能为空!")
+    #
+    #     if not self.request.data_format.get("pay_passwd"):
+    #         raise PubErrorCustom("请输入支付密码!")
+    #     if self.request.data_format.get("pay_passwd") != self.request.user.pay_passwd:
+    #         raise PubErrorCustom("支付密码错误!")
+    #
+    #     try:
+    #         user = Users.objects.get(userid=self.request.data_format.get("userid"))
+    #     except Users.DoesNotExist:
+    #         raise PubErrorCustom("码商ID不存在!")
+    #
+    #     if float(user.up_bal) - float(user.bal) - float(user.cashout_bal) < self.request.data_format.get("amount"):
+    #         raise PubErrorCustom("可提余额不足!")
+    #
+    #     if self.request.data_format.get("amount") <= 0:
+    #         raise PubErrorCustom("请输入正确的提现金额!")
+    #
+    #     user = upd_bal(userid=user.userid, cashout_bal=self.request.data_format.get("amount"))
+    #
+    #     UpCashoutList.objects.create(**{
+    #         "userid": self.request.user.userid,
+    #         "name": self.request.user.name,
+    #         "userid_to" : user.userid,
+    #         "name_to" : user.name,
+    #         "amount": self.request.data_format.get("amount"),
+    #         "bank_name": self.request.data_format.get("bank")['bank_name'],
+    #         "open_name": self.request.data_format.get("bank")['open_name'],
+    #         "open_bank": self.request.data_format.get("bank")['open_bank'],
+    #         "bank_card_number": self.request.data_format.get("bank")['bank_card_number'],
+    #         "status": "0"
+    #     })
+    #     return {"data":{
+    #         "bal":user.bal,
+    #         "up_bal" : user.up_bal,
+    #         "cashout_bal" : user.cashout_bal
+    #     }}
+    #
+    # #提现通过
+    # @list_route(methods=['POST'])
+    # @Core_connector(transaction=True)
+    # def up_cashout_confirm(self,request, *args, **kwargs):
+    #
+    #     try:
+    #         cashlist = UpCashoutList.objects.select_for_update().get(id=self.request.data_format.get('id'),status=0)
+    #     except CashoutList.DoesNotExist:
+    #         raise PubErrorCustom("此纪录不存在!")
+    #
+    #     cashlist.status = '1'
+    #     cashlist.updtime = time.mktime(timezone.now().timetuple())
+    #     cashlist.save()
+    #
+    #     upd_bal(userid=cashlist.userid_to,cashout_bal = cashlist.amount*-1,up_bal=cashlist.amount*-1,memo="提现")
+    #
+    #     return None
+    #
+    # # 提现拒绝
+    # @list_route(methods=['POST'])
+    # @Core_connector(transaction=True)
+    # def up_cashout_cancel(self, request, *args, **kwargs):
+    #
+    #     try:
+    #         cashlist = UpCashoutList.objects.get(id=self.request.data_format.get('id'))
+    #     except CashoutList.DoesNotExist:
+    #         raise PubErrorCustom("此纪录不存在!")
+    #
+    #     cashlist.status = '2'
+    #     cashlist.updtime = time.mktime(timezone.now().timetuple())
+    #     cashlist.save()
+    #
+    #     upd_bal(userid=cashlist.userid_to,cashout_bal = cashlist.amount*-1)
+    #
+    #     return None
 
     @list_route(methods=['POST'])
     @Core_connector(transaction=True)
