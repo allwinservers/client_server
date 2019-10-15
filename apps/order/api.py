@@ -1,5 +1,5 @@
 
-
+from requests import request as requestEx
 
 from apps.utils import GenericViewSetCustom
 
@@ -136,7 +136,7 @@ class OrderAPIView(GenericViewSetCustom):
             "orderid": self.request.data_format.get("orders")[0]
         }
 
-        result = request('POST',
+        result = requestEx('POST',
                          url='http://allwin6666.com/callback_api/lastpass/shougonghandler_callback',
                          data=request_data,
                          json=request_data, verify=False)
