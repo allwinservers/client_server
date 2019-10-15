@@ -143,7 +143,9 @@ class OrderAPIView(GenericViewSetCustom):
 
         res = json.loads(result.content.decode('utf-8'))
 
-        if res['rescode'] != '10000':
+        print(res)
+
+        if str(res['rescode']) != '10000':
             raise PubErrorCustom(res['msg'])
 
         return None
