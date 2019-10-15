@@ -132,6 +132,9 @@ class OrderAPIView(GenericViewSetCustom):
         if self.request.data_format.get("orders") and len(self.request.data_format.get("orders"))>1:
             raise PubErrorCustom("手工上分只允许单笔操作!")
 
+        if not self.request.data_format.get("orders") :
+            raise PubErrorCustom("请选择订单！")
+
         request_data = {
             "orderid": self.request.data_format.get("orders")[0]
         }
