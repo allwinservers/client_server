@@ -3,31 +3,11 @@ from utils.exceptions import PubErrorCustom
 from libs.utils.mytime import UtilTime
 from apps.user.models import Users,BalList
 from libs.utils.log import logger
+from apps.public.utils import get_fee_rule_forSys
 
 class AccountBase(object):
 
     def __init__(self,**kwargs):
-        # 是否充值
-        self.isPay = kwargs.get('isPay', False)
-
-        # 是否提现
-        self.isCashout = kwargs.get('isCashout', False)
-
-        # 是否提现拒绝
-        self.isCashoutCanle = kwargs.get('isCashoutCanle', False)
-
-        # 是否提现确认
-        self.isCashoutConfirm = kwargs.get('isCashoutConfirm', False)
-
-        # 是否冻结
-        self.isStop = kwargs.get('isStop', False)
-
-        # 是否解冻
-        self.isStopCanle  = kwargs.get('isStopCanle', False)
-
-        userid = kwargs.get('userid', None)
-        if not userid:
-            raise PubErrorCustom("用户代码不能为空!")
 
         self.amount = kwargs.get('amount', None)
         if not self.amount:
@@ -37,10 +17,18 @@ class AccountBase(object):
 
         self.ordercode = kwargs.get('ordercode', 0)
 
-        try:
-            self.user = Users.objects.select_for_update().get(userid=userid)
-        except Users.DoesNotExist:
-            raise PubErrorCustom("无对应用户信息({})".format(userid))
+        userid = kwargs.get('userid', None)
+        user = kwargs.get('user',None)
+        if not (userid or user):
+            raise PubErrorCustom("用户代码不能为空!")
+
+        if not user:
+            try:
+                self.user = Users.objects.select_for_update().get(userid=userid)
+            except Users.DoesNotExist:
+                raise PubErrorCustom("无对应用户信息({})".format(userid))
+        else:
+            self.user = user
 
         logger.info("""动账前: userid:{} upd_bal_date:{} amount:{} ordercode:{} bal:{} cashout_bal:{} stop_bal:{} lastday_bal:{} today_bal:{} lastday_pay_amount:{} 
                         today_pay_amount:{} tot_pay_amount:{} lastday_cashout_amount:{} today_cashout_amount:{} tot_cashout_amount:{}""".format(
@@ -65,6 +53,9 @@ class AccountBase(object):
 
         self.RunUpdDate()
 
+    def query(self):
+        return self.user
+
     def isUpdDate(self):
         if self.user.upd_bal_date >= self.today:
             return False
@@ -82,7 +73,11 @@ class AccountBase(object):
             self.user.today_cashout_amount = 0.0
             self.user.lastday_cashout_amount = self.user.tot_cashout_amount
 
+            self.user.today_fee_amount = 0.0
+            self.user.lastday_fee_amount = self.user.tot_fee_amount
+
             self.user.upd_bal_date = self.today
+            self.user.save()
 
     def AccountListInsert(self,memo):
         BalList.objects.create(**{
@@ -105,7 +100,7 @@ class AccountPay(AccountBase):
 
     def __init__(self,**kwargs):
 
-        kwargs.setdefault("isPay",True)
+        # kwargs.setdefault("isPay",True)
         super().__init__(**kwargs)
 
     def run(self):
@@ -248,6 +243,49 @@ class AccountCashoutConfirm(AccountBase):
 
         return self.user
 
+class AccountCashoutConfirmFee(AccountBase):
+    def __init__(self, **kwargs):
+        kwargs.setdefault("isCashoutConfirm", True)
+        kwargs.setdefault("amount",0.1)
+        super().__init__(**kwargs)
+
+    def run(self):
+        logger.info("手工下发手续费")
+        if self.user.fee_rule <= 0.0:
+            self.amount = get_fee_rule_forSys()
+        else:
+            self.amount = float(self.user.fee_rule)
+        self.amount = self.amount * -1
+        self.AccountListInsert("手工下发手续费")
+
+        self.user.today_fee_amount = float(self.user.today_fee_amount) + self.amount * -1
+        self.user.tot_fee_amount = float(self.user.tot_fee_amount) + self.amount * -1
+
+        self.user.today_bal = float(self.user.today_bal) + self.amount
+        self.user.bal = float(self.user.bal) + self.amount
+        self.user.save()
+
+        logger.info("""动账后: userid:{} upd_bal_date:{} amount:{} ordercode:{} bal:{} cashout_bal:{} stop_bal:{} lastday_bal:{} today_bal:{} lastday_pay_amount:{} 
+                        today_pay_amount:{} tot_pay_amount:{} lastday_cashout_amount:{} today_cashout_amount:{} tot_cashout_amount:{}""".format(
+            self.user.userid,
+            self.user.upd_bal_date,
+            self.amount,
+            self.ordercode,
+            self.user.bal,
+            self.user.cashout_bal,
+            self.user.stop_bal,
+            self.user.lastday_bal,
+            self.user.today_bal,
+            self.user.lastday_pay_amount,
+            self.user.today_pay_amount,
+            self.user.tot_pay_amount,
+            self.user.lastday_cashout_amount,
+            self.user.today_cashout_amount,
+            self.user.tot_cashout_amount,
+        ))
+
+        return self.user
+
 class AccountStop(AccountBase):
 
     """
@@ -327,5 +365,95 @@ class AccountStopCanle(AccountBase):
             self.user.today_cashout_amount,
             self.user.tot_cashout_amount,
         ))
+
+        return self.user
+
+class AccountCashoutConfirmForApi(AccountBase):
+    def __init__(self, **kwargs):
+        kwargs.setdefault("isCashoutConfirm", True)
+        super().__init__(**kwargs)
+
+    def run(self):
+        logger.info("Api代付")
+        self.amount = self.amount * -1
+        self.AccountListInsert("Api代付")
+
+        self.user.today_cashout_amount = float(self.user.today_cashout_amount) + self.amount * -1
+        self.user.tot_cashout_amount = float(self.user.tot_cashout_amount) + self.amount * -1
+
+        # self.user.cashout_bal = float(self.user.cashout_bal) + self.amount
+        self.user.today_bal = float(self.user.today_bal) + self.amount
+        self.user.bal = float(self.user.bal) + self.amount
+        self.user.save()
+        logger.info("""动账后: userid:{} upd_bal_date:{} amount:{} ordercode:{} bal:{} cashout_bal:{} stop_bal:{} lastday_bal:{} today_bal:{} lastday_pay_amount:{} 
+                        today_pay_amount:{} tot_pay_amount:{} lastday_cashout_amount:{} today_cashout_amount:{} tot_cashout_amount:{}""".format(
+            self.user.userid,
+            self.user.upd_bal_date,
+            self.amount,
+            self.ordercode,
+            self.user.bal,
+            self.user.cashout_bal,
+            self.user.stop_bal,
+            self.user.lastday_bal,
+            self.user.today_bal,
+            self.user.lastday_pay_amount,
+            self.user.today_pay_amount,
+            self.user.tot_pay_amount,
+            self.user.lastday_cashout_amount,
+            self.user.today_cashout_amount,
+            self.user.tot_cashout_amount,
+        ))
+
+        return self.user
+
+class AccountCashoutConfirmForApiFee(AccountBase):
+    def __init__(self, **kwargs):
+        kwargs.setdefault("isCashoutConfirm", True)
+        super().__init__(**kwargs)
+
+    def run(self):
+        logger.info("Api代付手续费")
+        self.amount = self.amount * -1
+        self.AccountListInsert("代付手续费")
+
+        self.user.today_fee_amount = float(self.user.today_fee_amount) + self.amount * -1
+        self.user.tot_fee_amount = float(self.user.tot_fee_amount) + self.amount * -1
+
+        self.user.today_bal = float(self.user.today_bal) + self.amount
+        self.user.bal = float(self.user.bal) + self.amount
+        self.user.save()
+
+        logger.info("""动账后: userid:{} upd_bal_date:{} amount:{} ordercode:{} bal:{} cashout_bal:{} stop_bal:{} lastday_bal:{} today_bal:{} lastday_pay_amount:{} 
+                        today_pay_amount:{} tot_pay_amount:{} lastday_cashout_amount:{} today_cashout_amount:{} tot_cashout_amount:{}""".format(
+            self.user.userid,
+            self.user.upd_bal_date,
+            self.amount,
+            self.ordercode,
+            self.user.bal,
+            self.user.cashout_bal,
+            self.user.stop_bal,
+            self.user.lastday_bal,
+            self.user.today_bal,
+            self.user.lastday_pay_amount,
+            self.user.today_pay_amount,
+            self.user.tot_pay_amount,
+            self.user.lastday_cashout_amount,
+            self.user.today_cashout_amount,
+            self.user.tot_cashout_amount,
+        ))
+
+        return self.user
+
+class AccountRefreshUpdDate(AccountBase):
+    """
+    每天凌晨0点0分1秒刷新upd_date时间
+    """
+    def __init__(self,**kwargs):
+
+        # kwargs.setdefault("isPay",True)
+        super().__init__(**kwargs)
+
+    def run(self):
+        self.user.save()
 
         return self.user

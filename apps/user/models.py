@@ -89,6 +89,12 @@ class Users(models.Model):
     up_bal = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="码商流水")
     google_token = models.CharField(max_length=60,verbose_name="google_token",default="")
 
+    lastday_fee_amount = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="昨日手续费")
+    today_fee_amount = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="今日手续费")
+    tot_fee_amount = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="总手续费")
+
+    fee_rule = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="该商户收取多少手续费")
+
     rolename  = None
     level = None
     name_to = None

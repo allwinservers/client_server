@@ -40,6 +40,9 @@ def check_df_ip(userid,ip):
 def get_sysparam():
     return Sysparam.objects.get()
 
+def get_fee_rule_forSys():
+    return float(Sysparam.objects.get().fee_rule)
+
 
 def get_sysnumber(type=None):
     if not type:

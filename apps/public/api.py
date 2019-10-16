@@ -31,7 +31,7 @@ from libs.utils.google_auth import create_google_token
 
 from apps.lastpass.utils import LastPass_BAWANGKUAIJIE
 
-from apps.account import AccountCashout,AccountCashoutCanle,AccountCashoutConfirm
+from apps.account import AccountCashout,AccountCashoutCanle,AccountCashoutConfirm,AccountCashoutConfirmFee
 import time
 import os
 import subprocess
@@ -868,7 +868,12 @@ class PublicAPIView(viewsets.ViewSet):
 
         # upd_bal(userid=self.request.data_format.get("userid"),cashout_bal = cashlist.amount*-1,bal=cashlist.amount*-1,memo="提现")
 
-        AccountCashoutConfirm(userid=self.request.data_format.get("userid"), amount=cashlist.amount).run()
+        try:
+            user = Users.objects.select_for_update().get(userid=self.request.data_format.get("userid"))
+        except Users.DoesNotExist:
+            raise PubErrorCustom("无对应用户信息({})".format(self.request.data_format.get("userid")))
+        AccountCashoutConfirm(user=user, amount=cashlist.amount).run()
+        AccountCashoutConfirmFee(user=user).run()
 
         return None
 
