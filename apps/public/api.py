@@ -686,7 +686,7 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector()
     def get_bal(self,request, *args, **kwargs):
 
-        return {"data" : {"bal":round(self.request.user.bal,2),"cashout_bal":round(self.request.user.cashout_bal,2)}}
+        return {"data" : {"bal":round(self.request.user.bal,2),"cashout_bal":round(self.request.user.cashout_bal,2)},"fee_rule":round(self.request.user.fee_rule,2)}
 
 
 
