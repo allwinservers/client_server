@@ -29,6 +29,18 @@ class OrderModelSerializer(serializers.ModelSerializer):
 
     username = serializers.SerializerMethodField()
 
+    isstop = serializers.CharField()
+
+    isstop_name =serializers.SerializerMethodField()
+
+
+    def get_isstop_name(self,obj):
+
+        if str(obj.isstop) == '1':
+            return "否"
+        else:
+            return "是"
+
     def get_username(self,obj):
         return Users.objects.get(userid=obj.userid).name
 

@@ -18,6 +18,8 @@ from utils.exceptions import PubErrorCustom
 from apps.user.models import UserLink
 from apps.utils import RedisOrderCount
 
+from apps.account import AccountStop,AccountStopCanle
+
 import json
 from apps.order.utils import get_today_start_end_time
 
@@ -32,7 +34,7 @@ class OrderAPIView(GenericViewSetCustom):
         return [auth() for auth in [Authentication]]
 
     @list_route(methods=['GET'])
-    @Core_connector(transaction=True)
+    @Core_connector()
     def order_query(self, request, *args, **kwargs):
 
         QuerySet = Order.objects.all()
@@ -124,6 +126,38 @@ class OrderAPIView(GenericViewSetCustom):
             "tot_order_ok_count" : round(res['tot_order_ok_count'],2) if res and 'tot_order_ok_count' in res else 0
         }
         return {"data": r_data,"header":headers}
+
+    @list_route(methods=['POST'])
+    @Core_connector(transaction=True)
+    def stop_handler(self, request, *args, **kwargs):
+        try:
+            order = Order.objects.select_for_update().get(ordercode=self.request.data_format.get("ordercode"))
+            if not str(order.status)=='0':
+                raise PubErrorCustom("只可冻结成功的订单!")
+            if str(order.isstop) == '0':
+                raise PubErrorCustom("该订单已被冻结")
+        except Order.DoesNotExist:
+            raise PubErrorCustom("此订单号不存在!")
+
+        AccountStop(userid=order.userid,amount=order.amount).run()
+        order.isstop = '0'
+        order.save()
+        return None
+
+    @list_route(methods=['POST'])
+    @Core_connector(transaction=True)
+    def stop_canle_handler(self, request, *args, **kwargs):
+        try:
+            order = Order.objects.select_for_update().get(ordercode=self.request.data_format.get("ordercode"))
+
+        except Order.DoesNotExist:
+            raise PubErrorCustom("此订单号不存在!")
+
+        AccountStopCanle(userid=order.userid,amount=order.amount).run()
+        order.isstop = '1'
+        order.save()
+        return None
+
 
     @list_route(methods=['POST'])
     @Core_connector(transaction=True)

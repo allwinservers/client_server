@@ -293,10 +293,14 @@ class AccountStop(AccountBase):
     """
 
     def __init__(self, **kwargs):
-        kwargs.setdefault("isStop", True)
+        # kwargs.setdefault("isStop", True)
+        # kwargs.setdefault("amount", 0.1)
         super().__init__(**kwargs)
 
     def run(self):
+        #3倍冻结,写死
+        self.amount *= 3
+
         logger.info("冻结")
         self.amount = self.amount * -1
         self.AccountListInsert("冻结")
@@ -338,6 +342,8 @@ class AccountStopCanle(AccountBase):
         super().__init__(**kwargs)
 
     def run(self):
+        #3倍冻结,写死
+        self.amount *= 3
         logger.info("解冻")
         self.AccountListInsert("解冻")
 

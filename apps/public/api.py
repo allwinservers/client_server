@@ -14,6 +14,7 @@ from apps.public.utils import check_df_ip
 from apps.pay.models import PayPass
 
 from libs.utils.mytime import timestamp_toTime,UtilTime
+from apps.public.utils import get_fee_rule_forSys
 from libs.utils.string_extension import md5pass
 
 from public.serializers import ManageSerializer,QrcodeModelSerializer,WechatHelperModelSerializer
@@ -686,9 +687,12 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector()
     def get_bal(self,request, *args, **kwargs):
 
-        return {"data" : {"bal":round(self.request.user.bal,2),"cashout_bal":round(self.request.user.cashout_bal,2)},"fee_rule":round(self.request.user.fee_rule,2)}
+        if self.request.user.fee_rule <= 0.0:
+            fee = get_fee_rule_forSys()
+        else:
+            fee = float(self.request.user.fee_rule)
 
-
+        return {"data" : {"bal":round(self.request.user.bal,2),"cashout_bal":round(self.request.user.cashout_bal,2),"fee_rule":round(fee,2)}}
 
 
     #提现申请
@@ -707,7 +711,12 @@ class PublicAPIView(viewsets.ViewSet):
         if self.request.data_format.get("pay_passwd") != self.request.user.pay_passwd:
             raise PubErrorCustom("支付密码错误!")
 
-        if float(self.request.user.bal) - abs(float(self.request.user.cashout_bal)) < self.request.data_format.get("amount"):
+        if self.request.user.fee_rule <= 0.0:
+            fee = get_fee_rule_forSys()
+        else:
+            fee = float(self.request.user.fee_rule)
+
+        if float(self.request.user.bal) - abs(float(self.request.user.cashout_bal)) - fee < self.request.data_format.get("amount"):
             raise  PubErrorCustom("可提余额不足!")
 
         if self.request.data_format.get("amount")<=0 :

@@ -47,6 +47,8 @@ class Order(models.Model):
 
     lock = models.CharField(verbose_name="是否加密,0-加密,1-不加密",default="0",max_length=1)
 
+    isstop = models.CharField(max_length=1,verbose_name="冻结状态,0-已冻结,1-未冻结",default="1")
+
 
     def save(self, *args, **kwargs):
         t= time.mktime(timezone.now().timetuple())
@@ -83,6 +85,8 @@ class CashoutList(models.Model):
     tranid = models.CharField(default='',verbose_name="交易流水号,代付产生",max_length=120)
     paypassid = models.BigIntegerField(default=0,verbose_name="代付产生,渠道号")
     downordercode = models.CharField(default='',max_length=120,verbose_name="商户订单号")
+
+
 
     def save(self, *args, **kwargs):
         t = time.mktime(timezone.now().timetuple())

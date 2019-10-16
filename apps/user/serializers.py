@@ -10,6 +10,7 @@ from apps.order.models import Order
 
 from apps.public.utils import get_sysparam
 from libs.utils.mytime import UtilTime
+from apps.public.utils import get_fee_rule_forSys
 
 class UsersSerializer1(serializers.ModelSerializer):
     class Meta:
@@ -132,9 +133,18 @@ class BusinessSerializer(serializers.Serializer):
 
     agents = serializers.SerializerMethodField()
 
+    fee_rule = serializers.SerializerMethodField()
+
 
 
     paytypes = serializers.SerializerMethodField()
+
+    def get_fee_rule(self,obj):
+        if obj.fee_rule <= 0.0:
+            fee = get_fee_rule_forSys()
+        else:
+            fee = float(obj.fee_rule)
+        return fee
 
     def get_paytypes(self,obj):
         paytype = PayType.objects.raw("""

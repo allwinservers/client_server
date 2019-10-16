@@ -23,6 +23,7 @@ class Sysparam(models.Model):
     order_failure_time = models.IntegerField(default=0,verbose_name="单位秒")
 
     fee_rule = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="手续费")
+
     bal = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="内部账余额")
     business_agent_tot = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="商户代理总余额")
 

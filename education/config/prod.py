@@ -7,7 +7,7 @@ import os
 
 DBHOST = os.environ.get('DBHOST', 'localhost')
 DBPORT = os.environ.get('DBPORT', '3306')
-DBNAME = os.environ.get('DBNAME', 'allwin')
+DBNAME = os.environ.get('DBNAME', 'allwin_new')
 DBUSER = os.environ.get('DBUSER', 'root')
 DBPASS = os.environ.get('DBPASS', '123456')
 
