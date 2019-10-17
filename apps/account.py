@@ -68,7 +68,7 @@ class AccountBase(object):
             self.user.lastday_bal = self.user.bal
 
             self.user.today_pay_amount = 0.0
-            self.user.lastday_pay_amount = self.user.today_pay_amount
+            self.user.lastday_pay_amount = self.user.tot_pay_amount
 
             self.user.today_cashout_amount = 0.0
             self.user.lastday_cashout_amount = self.user.tot_cashout_amount
