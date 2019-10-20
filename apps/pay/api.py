@@ -120,9 +120,12 @@ class PayAPIView(viewsets.ViewSet):
                     if self.request.query_params_format.get("userid") in userids:
                         query = query.filter(userid=self.request.query_params_format.get("userid"))
                     else:
-                        query = query.filter(userid=0)
+                        query = query.filter(userid=self.request.user.userid)
                 else:
-                    query = query.filter(userid__in=[ item.userid for item in userlink ])
+                    query_list_agent = [ item.userid for item in userlink ]
+                    query_list_agent.append(self.request.user.userid)
+
+                    query = query.filter(userid__in=query_list_agent)
         else:
             raise PubErrorCustom("用户类型有误!")
 
@@ -210,8 +213,10 @@ class PayAPIView(viewsets.ViewSet):
             PayPassLinkType.objects.filter(to_id=request.data_format.get("delete").get("id"),type=request.data_format.get("delete").get("type")).delete()
         else:
             for (index, item) in enumerate(request.data_format.get("insert")):
+                if 'userid' not in item:
+                    item['userid'] = 0
                 if index == 0:
-                    PayPassLinkType.objects.filter(to_id=item['to_id'],type=item['type']).delete()
+                    PayPassLinkType.objects.filter(to_id=item['to_id'],type=item['type'],userid=item['userid']).delete()
                 SaveSerializer(serializers_class=PayPassLinkTypeModelSerializer, data=item)
 
         return None
@@ -220,6 +225,7 @@ class PayAPIView(viewsets.ViewSet):
     @Core_connector(pagination=True)
     def paypasslinktype_query(self, request, *args, **kwargs):
 
+        print(self.request.query_params_format)
         query_format=str()
         query_params=list()
         if self.request.query_params_format.get("id"):
@@ -229,13 +235,53 @@ class PayAPIView(viewsets.ViewSet):
             query_format = query_format + " and t2.type=%s"
             query_params.append(self.request.query_params_format.get("type"))
 
+        if  self.request.query_params_format.get("isAgent") == 1:
+            if not self.request.query_params_format.get("userid"):
+                raise PubErrorCustom("用户ID不能为空")
+            query_format = query_format + " and t2.userid in (%s,0)"
+            query_params.append(self.request.query_params_format.get("userid"))
+        elif not self.request.query_params_format.get("isAgent") and self.request.query_params_format.get("userid"):
+            query_format = query_format + " and t2.userid ='%s'"
+            query_params.append(self.request.query_params_format.get("userid"))
+        else:
+            query_format = query_format + " and t2.userid ='0'"
+
+
         paytype = PayType.objects.raw("""
-            SELECT t1.*,t2.rate,t2.passid FROM paytype as t1 
+            SELECT t1.*,t2.rate,t2.passid,t2.userid FROM paytype as t1 
             INNER JOIN paypasslinktype as t2 on t1.paytypeid = t2.paytypeid
             WHERE 1=1 %s order by t1.createtime
         """%(query_format),query_params)
 
-        return {"data":PayTypeModelSerializer(paytype, many=True).data}
+
+        data = PayTypeModelSerializer(paytype, many=True).data
+
+
+        r_data=[]
+
+        if self.request.query_params_format.get("isAgent") == 1:
+            for item in data:
+                if len(r_data):
+                    isFlag = False
+                    for item_r_data in r_data:
+                        if item_r_data['paytypeid'] == item['paytypeid'] and item_r_data['type'] == item['type']:
+                            if int(item_r_data['userid']) > 0:
+                                isFlag = True
+                                break
+                            else:
+                                item_r_data['rate'] = item['rate']
+                                item_r_data['userid'] = item['userid']
+                                item_r_data['createtime'] = item['createtime']
+                                isFlag = True
+                                break
+                    if isFlag:
+                        continue
+                r_data.append(item)
+
+
+            return {"data":r_data}
+        else:
+            return {"data": data}
 
 
     #商户费率查询

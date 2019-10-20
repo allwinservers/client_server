@@ -209,11 +209,7 @@ class OrderAPIView(GenericViewSetCustom):
         elif self.request.user.rolecode == '2001':
             QuerySet = QuerySet.filter(userid=self.request.user.userid)
         elif request.user.rolecode == "3001":
-            userlink = UserLink.objects.filter(userid_to=self.request.user.userid)
-            if not userlink.exists():
-                QuerySet=CashoutList.objects.filter(userid=0)
-            else:
-                QuerySet=QuerySet.filter(userid__in=[item.userid for item in userlink])
+            QuerySet = QuerySet.filter(userid=self.request.user.userid)
         else:
             raise PubErrorCustom("用户类型有误!")
 
@@ -253,11 +249,7 @@ class OrderAPIView(GenericViewSetCustom):
         elif self.request.user.rolecode == '2001':
             QuerySet = QuerySet.filter(userid=self.request.user.userid)
         elif request.user.rolecode == "3001":
-            userlink = UserLink.objects.filter(userid_to=self.request.user.userid)
-            if not userlink.exists():
-                QuerySet=CashoutList.objects.filter(userid=0)
-            else:
-                QuerySet=QuerySet.filter(userid__in=[item.userid for item in userlink])
+            QuerySet = QuerySet.filter(userid=self.request.user.userid)
         else:
             raise PubErrorCustom("用户类型有误!")
 

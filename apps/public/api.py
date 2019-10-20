@@ -1601,7 +1601,7 @@ class PublicAPIView(viewsets.ViewSet):
                     "name": '支付管理',
                     "iconCls": 'el-icon-s-finance',
                     "children": [
-                        {"path": '/rate', "component": "rate", "name": '费率'},
+                        # {"path": '/rate', "component": "rate", "name": '费率'},
                         # {"path": '/bankinfo', "component": "bankinfo", "name": '银行卡设置'},
                         {"path": '/cashout', "component": "cashout", "name": '提现申请'},
                         {"path": '/cashoutlist', "component": "cashoutlist", "name": '提现申请记录'},

@@ -11,6 +11,7 @@ class PayTypeModelSerializer(serializers.ModelSerializer):
     rate = serializers.DecimalField(max_digits=18,decimal_places=4)
     passid = serializers.IntegerField()
     paypassname = serializers.CharField()
+    userid = serializers.CharField()
 
     class Meta:
         model = PayType
@@ -58,7 +59,7 @@ class PayPassLinkTypeModelSerializer(serializers.ModelSerializer):
         validators = [
             UniqueTogetherValidator(
                 queryset=PayPassLinkType.objects.all(),
-                fields=('paytypeid','to_id','type',),
+                fields=('paytypeid','to_id','type','userid',),
                 message="关联关系重复！"
             ),
         ]

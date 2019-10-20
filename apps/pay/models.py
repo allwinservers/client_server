@@ -16,6 +16,7 @@ class PayType(models.Model):
     createtime = models.BigIntegerField(default=0)
 
     rate=None
+    userid=None
     passid=None
 
     paypassname = None
@@ -76,6 +77,7 @@ class PayPassLinkType(models.Model):
     rate = models.DecimalField(max_digits=18,decimal_places=6,default=0.000)
     passid = models.BigIntegerField(default=0)
     createtime = models.BigIntegerField(default=0)
+    userid = models.BigIntegerField(default=0,null=True)
 
     paypassname = None
     paytypename = None
