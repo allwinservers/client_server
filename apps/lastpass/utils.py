@@ -3674,7 +3674,7 @@ class LastPass_BAWANGKUAIJIE(LastPassBase):
 
 
         #代付地址
-        self.daifu_url = "http://orderpay.xincheng-sh.com:8088/webwt/pay/gateway.do"
+        self.daifu_url = "http://df01.xincheng-sh.com:8088/webwt/pay/gateway.do"
 
         self.secret = "fcdd45eba6164b9cb2affed11b205d50"
 
