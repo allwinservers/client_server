@@ -2,7 +2,7 @@
 certifi==2018.4.16
 chardet==3.0.4
 coreapi==2.3.3
-django==2.0.7
+django==2.0.12
 django-filter==1.1.0
 djangorestframework==3.8.2
 markdown==2.6.11
