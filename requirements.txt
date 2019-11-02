@@ -20,3 +20,4 @@ cryptography
 cryptokit
 pycryptodome
 demjson
+pyDes

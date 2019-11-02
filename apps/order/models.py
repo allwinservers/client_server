@@ -78,6 +78,8 @@ class CashoutList(models.Model):
 
     status = models.CharField(max_length=1,verbose_name="提现状态,0-提现申请中,1-提现通过,2-提现拒绝")
 
+    textstatus = models.CharField(max_length=255,verbose_name="代付状态",default="")
+
     createtime = models.BigIntegerField(default=0)
 
     updtime  = models.BigIntegerField(default=0)

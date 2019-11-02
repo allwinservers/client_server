@@ -30,7 +30,7 @@ from apps.utils import url_join
 from include.data.choices_list import Choices_to_Dict
 from libs.utils.google_auth import create_google_token
 
-from apps.lastpass.utils import LastPass_BAWANGKUAIJIE
+from apps.lastpass.utils import LastPass_BAWANGKUAIJIE,LastPass_KUAIJIE
 
 from apps.account import AccountCashout,AccountCashoutCanle,AccountCashoutConfirm,AccountCashoutConfirmFee
 import time
@@ -784,6 +784,39 @@ class PublicAPIView(viewsets.ViewSet):
             QueryObj=QueryObj.filter(paypassid=request.query_params_format.get("id"))
         return {"data" : PayPassModelSerializer(QueryObj,many=True).data}
 
+
+    #代付订单查询
+    #代付提现
+    @list_route(methods=['POST'])
+    @Core_connector(transaction=True)
+    def daifuOrderQuery(self,request, *args, **kwargs):
+
+        check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
+
+        if not request.data_format.get("dfordercode"):
+            raise PubErrorCustom("订单号不能为空!")
+
+        try:
+            obj = CashoutList.objects.get(id= request.data_format.get("id"))
+        except CashoutList.DoesNotExist:
+            raise PubErrorCustom("此订单不存在!")
+
+        if str(request.data_format.get('paypassid')) == '54':
+            res = LastPass_BAWANGKUAIJIE(data={
+                "orderId" : request.data_format.get("dfordercode")
+            }).df_query()
+            obj.textstatus = res
+            obj.save()
+            return {"data":res}
+
+        elif str(request.data_format.get('paypassid')) == '51':
+            res=LastPass_KUAIJIE(data={
+                "tradeCustorder" : request.data_format.get("dfordercode")
+            }).df_order_query()
+            obj.textstatus = res
+            obj.save()
+            return {"data":res}
+
     #代付提现
     @list_route(methods=['POST'])
     @Core_connector(transaction=True)
@@ -832,8 +865,44 @@ class PublicAPIView(viewsets.ViewSet):
             cashlist.save()
 
             return None
+        elif str(request.data_format.get('paypassid')) == '51':
+            if not self.request.data_format.get("bank"):
+                raise PubErrorCustom("请选择银行卡信息!")
 
+            if not self.request.data_format.get("pay_passwd"):
+                raise PubErrorCustom("请输入支付密码!")
+            if self.request.data_format.get("pay_passwd") != self.request.user.pay_passwd:
+                raise PubErrorCustom("支付密码错误!")
 
+            if self.request.data_format.get("amount") <= 0:
+                raise PubErrorCustom("请输入正确的提现金额!")
+
+            cashlist = CashoutList.objects.create(**{
+                "userid": self.request.user.userid,
+                "name": self.request.user.name,
+                "amount": self.request.data_format.get("amount"),
+                "bank_name": self.request.data_format.get("bank")['bank_name'],
+                "open_name": self.request.data_format.get("bank")['open_name'],
+                "open_bank": self.request.data_format.get("bank")['open_bank'],
+                "bank_card_number": self.request.data_format.get("bank")['bank_card_number'],
+                "status": "0"
+            })
+            cashlist.downordercode = "%08d" % cashlist.id
+
+            res = LastPass_KUAIJIE().df_api(data={
+                "orderId": "DF%08d%s" % (cashlist.userid, cashlist.downordercode),
+                "txnAmt": "%.2lf"%float(cashlist.amount),
+                "accountNo": cashlist.bank_card_number,
+                "bankName": cashlist.bank_name,
+                "accountName": cashlist.open_name
+            })
+
+            cashlist.status = '1'
+            cashlist.paypassid = '51'
+            cashlist.tranid = cashlist.downordercode
+            cashlist.save()
+
+            return None
         else:
             raise PubErrorCustom("代付渠道有误!")
 
@@ -857,6 +926,14 @@ class PublicAPIView(viewsets.ViewSet):
                     'freezeAmt'] else 0.0,
                 "acBal": round(float(res['REP_BODY']['acBal']) / 100.0, 2) if res['REP_BODY'][
                     'acBal'] else 0.0,
+            } }
+        elif str(request.query_params_format.get("paypassid")) == '51':
+            res = LastPass_KUAIJIE(data={}).df_bal_query()
+            return {"data":{
+                "freezeOrderAmt" : 0.0,
+                "acT0": float(res)/100.0,
+                "freezeAmt": 0.0,
+                "acBal": float(res)/100.0,
             } }
         else:
             return None
