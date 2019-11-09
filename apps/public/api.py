@@ -30,7 +30,7 @@ from apps.utils import url_join
 from include.data.choices_list import Choices_to_Dict
 from libs.utils.google_auth import create_google_token
 
-from apps.lastpass.utils import LastPass_BAWANGKUAIJIE,LastPass_KUAIJIE
+from apps.lastpass.utils import LastPass_BAWANGKUAIJIE,LastPass_KUAIJIE,LastPass_GCPAYS
 
 from apps.account import AccountCashout,AccountCashoutCanle,AccountCashoutConfirm,AccountCashoutConfirmFee
 import time
@@ -776,7 +776,7 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector()
     def daifuPassList(self,request, *args, **kwargs):
 
-        check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
+        # check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
 
         QueryObj=PayPass.objects.filter(status__in=[0, 1],isdayfu='0')
 
@@ -791,7 +791,7 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector(transaction=True)
     def daifuOrderQuery(self,request, *args, **kwargs):
 
-        check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
+        # check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
 
         if not request.data_format.get("dfordercode"):
             raise PubErrorCustom("订单号不能为空!")
@@ -800,6 +800,8 @@ class PublicAPIView(viewsets.ViewSet):
             obj = CashoutList.objects.get(id= request.data_format.get("id"))
         except CashoutList.DoesNotExist:
             raise PubErrorCustom("此订单不存在!")
+
+        print(request.data_format)
 
         if str(request.data_format.get('paypassid')) == '54':
             res = LastPass_BAWANGKUAIJIE(data={
@@ -816,15 +818,21 @@ class PublicAPIView(viewsets.ViewSet):
             obj.textstatus = res
             obj.save()
             return {"data":res}
+        elif str(request.data_format.get('paypassid')) == '69':
+            res=LastPass_GCPAYS().df_order_query(data={
+                "orderNo" : request.data_format.get("dfordercode")
+            })
+            obj.textstatus = res
+            obj.save()
+            return {"data":res}
 
     #代付提现
     @list_route(methods=['POST'])
     @Core_connector(transaction=True)
     def daifuBalTixian(self,request, *args, **kwargs):
 
-        check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
+        # check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
 
-        print(request.data_format)
 
         if str(request.data_format.get('paypassid')) == '54':
             if not self.request.data_format.get("bank"):
@@ -903,6 +911,46 @@ class PublicAPIView(viewsets.ViewSet):
             cashlist.save()
 
             return None
+        elif str(request.data_format.get('paypassid')) == '69':
+            if not self.request.data_format.get("bank"):
+                raise PubErrorCustom("请选择银行卡信息!")
+
+            if not self.request.data_format.get("pay_passwd"):
+                raise PubErrorCustom("请输入支付密码!")
+            if self.request.data_format.get("pay_passwd") != self.request.user.pay_passwd:
+                raise PubErrorCustom("支付密码错误!")
+
+            if self.request.data_format.get("amount") <= 0:
+                raise PubErrorCustom("请输入正确的提现金额!")
+
+            cashlist = CashoutList.objects.create(**{
+                "userid": self.request.user.userid,
+                "name": self.request.user.name,
+                "amount": self.request.data_format.get("amount"),
+                "bank_name": self.request.data_format.get("bank")['bank_name'],
+                "open_name": self.request.data_format.get("bank")['open_name'],
+                "open_bank": self.request.data_format.get("bank")['open_bank'],
+                "bank_card_number": self.request.data_format.get("bank")['bank_card_number'],
+                "status": "0"
+            })
+            cashlist.downordercode = "%08d" % cashlist.id
+
+            res = LastPass_GCPAYS().df_api(data={
+                "orderNo": "DF%08d%s" % (cashlist.userid, cashlist.downordercode),
+                "bankNo": cashlist.bank_card_number,
+                "timestap" : str(cashlist.createtime),
+                "realName": cashlist.open_name,
+                "money": int(float(cashlist.amount)*100.0),
+                "bankName": cashlist.bank_name,
+                "open_bank" : cashlist.open_bank
+            })
+
+            cashlist.status = '1'
+            cashlist.paypassid = '69'
+            cashlist.tranid = cashlist.downordercode
+            cashlist.save()
+
+            return None
         else:
             raise PubErrorCustom("代付渠道有误!")
 
@@ -912,7 +960,7 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector()
     def daifuBalQuery(self,request, *args, **kwargs):
 
-        check_df_ip(request.user.userid,request.META.get("HTTP_X_REAL_IP"))
+        # check_df_ip(request.user.userid,request.META.get("HTTP_X_REAL_IP"))
 
         if str(request.query_params_format.get("paypassid")) == '54':
 
@@ -934,6 +982,14 @@ class PublicAPIView(viewsets.ViewSet):
                 "acT0": float(res)/100.0,
                 "freezeAmt": 0.0,
                 "acBal": float(res)/100.0,
+            } }
+        elif str(request.query_params_format.get("paypassid")) == '69':
+            res = LastPass_GCPAYS(data={}).df_bal_query()
+            return {"data":{
+                "freezeOrderAmt" : 0.0,
+                "acT0": float(res.get("customerAmt")),
+                "freezeAmt": float(res.get("freezeAmt")),
+                "acBal": float(res.get("customerAmt"))
             } }
         else:
             return None

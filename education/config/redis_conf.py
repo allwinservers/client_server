@@ -1,6 +1,7 @@
 
 REDISPASSWORD = 'plokiqikj##mlad,..ad'
-REDISURL = '172.31.137.187'
+#REDISURL = '172.31.137.187'
+REDISURL = 'localhost'
 REDISPORT = '6379'
 
 CACHES = {

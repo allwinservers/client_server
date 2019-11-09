@@ -13,6 +13,11 @@ import time,random
 from libs.utils.log import logger
 import demjson
 
+from libs.utils.string_extension import md5pass
+
+from apps.utils import RedisHandler
+from django.shortcuts import render
+
 from Crypto.Cipher import AES
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.PublicKey import RSA
@@ -4498,6 +4503,231 @@ class LastPass_JINGDONG(LastPassBase):
             raise PubErrorCustom("订单已处理!")
 
         PayCallLastPass().run(order=order)
+
+class LastPass_GCPAYS(LastPassBase):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        # 订单生成地址
+        self.create_order_url = "http://47.97.62.178"
+
+        self.appId = "G11959365W92A99213979DA592"
+        self.appSecret = "12acb033b3065ae85306969c95ae40ecfee40cf7"
+
+        self.username = "1018125792@qq.com"
+        self.password = "hxzym@123456"
+
+        self.keyStore = "7312Acs2"
+
+        self.key="GCPAYS_TOKEN"
+        self.lKey = "GCPAYS_ORDER"
+
+
+        self.redis_client = RedisHandler(key=self.key,db="default").redis_client
+
+        self.token = self.redis_client.get(self.key)
+
+    def getToken(self):
+        url = self.create_order_url + '/oauth/token'
+        data = dict(
+            client_id=self.appId,
+            client_secret=self.appSecret,
+            grant_type="password",
+            username=self.username,
+            password=self.password
+        )
+        print(json.dumps(data))
+        result = request('POST', url=url,
+                         data=data, verify=False)
+        # result = request('POST', url=url,
+        #                  data=data, verify=False )
+
+        return json.loads(result.content.decode('utf-8'))
+
+    def sso(self):
+
+        if not self.token:
+            res = self.getToken()
+
+            self.token = res['access_token']
+
+            self.redis_client.set(self.key , self.token)
+            self.redis_client.expire(self.key, res['expires_in']-60)
+
+            url = self.create_order_url + '/user/profile/v1/info'
+            result = request('GET', url=url, verify=False, headers={
+                "ACCESSTOKEN": self.token
+            })
+            res = json.loads(result.content.decode('utf-8'))
+            if res.get("code") != 0:
+                raise PubErrorCustom("鉴权失败：{}".format(res.get("msg")))
+
+
+    def run(self,requestObj):
+        self.sso()
+
+        data= dict(
+            orderNo = self.data.get("ordercode"),
+            bankNo = self.data.get("bankCardNo"),
+            bankRealName = self.data.get("custName"),
+            payAmt = int(float(self.data.get("amount")) * 100.0)
+        )
+
+        data['sign'] = md5pass("{}{}{}{}{}".format(
+            str(self.appId),
+            str(data['orderNo']),
+            str(data['payAmt']),
+            str(data['bankNo']),
+            str(self.keyStore),
+        ))
+        print(data)
+        print(self.token)
+        url= self.create_order_url + '/paid/customer/send/pay/order'
+        result = request('POST', url=url,json=data, verify=False,headers={"Content-Type":'application/json',"ACCESSTOKEN": self.token})
+
+        res = json.loads(result.content.decode('utf-8'))
+
+        if res.get("code") != 0:
+            raise PubErrorCustom(res.get("msg"))
+
+        self.redis_client.lpush(self.lKey,data.get("orderNo"))
+
+        return render(requestObj, 'neichongGo.html', {
+            'data': {
+                "url" : res.get("data")
+            }
+        })
+
+    def df_api(self,data):
+
+        self.sso()
+        url = self.create_order_url + '/paid//customer/send/order'
+
+        data['sign'] = md5pass("{}{}{}{}{}{}".format(
+            str(self.appId),
+            str(data['orderNo']),
+            str(data['timestap']),
+            str(data['money']),
+            str(data['bankNo']),
+            str(self.keyStore),
+        ))
+
+        print(data)
+        result = request('POST', url=url, json=data, verify=False,
+                         headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
+
+        res = json.loads(result.content.decode('utf-8'))
+
+        print(res)
+
+        if res.get("code") != 0:
+            raise PubErrorCustom(res.get("msg"))
+
+    def df_order_query(self,data):
+        self.sso()
+
+        data['sign'] = md5pass("{}{}{}".format(
+            str(self.appId),
+            str(data['orderNo']),
+            str(self.keyStore),
+        ))
+
+        url = self.create_order_url + '/paid/query/in/order/id/{}/{}'.format(data.get("orderNo"),data.get("sign"))
+
+        print(data)
+        result = request('POST', url=url, json=data, verify=False,
+                         headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
+
+        res = json.loads(result.content.decode('utf-8'))
+        print(res)
+        if res.get("code") != 0:
+            raise PubErrorCustom(res.get("msg"))
+
+        print(res)
+        if not res.get("data",None):
+            raise PubErrorCustom("充值失败!")
+
+        if str(res.get("data").get("payStatus")) == '0':
+            return "充值中"
+        elif str(res.get("data").get("payStatus")) == '1':
+            return "充值成功"
+        else:
+            return "充值失败"
+
+    def df_bal_query(self):
+        self.sso()
+        url = self.create_order_url + '/web/query/customer/info'
+
+        result = request('POST', url=url, verify=False,
+                         headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
+
+        res = json.loads(result.content.decode('utf-8'))
+
+        if res.get("code") != 0:
+            raise PubErrorCustom(res.get("msg"))
+
+        return res.get("data")
+
+    def callback_run(self):
+
+        res = self.redis_client.rpop(self.lKey)
+        if res:
+            ordercode = res.decode('utf-8')
+            print("回调开始:{}".format(ordercode))
+
+            url = self.create_order_url + '/paid/query/in/order/id'
+
+            data=dict(
+                orderNo = ordercode
+            )
+            data['sign'] = md5pass("{}{}{}".format(
+                str(self.appId),
+                str(data['orderNo']),
+                str(self.keyStore),
+            ))
+            url += "/{}/{}".format(ordercode,data.get("sign"))
+
+            self.sso()
+            result = request('POST', url=url, json=data, verify=False,
+                             headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
+
+            res = json.loads(result.content.decode('utf-8'))
+
+            if res.get("code") != 0:
+                print("对方服务器出错{}".format(res.get("msg")))
+                self.redis_client.lpush(self.lKey,ordercode)
+                return
+
+            if not res.get('data',None):
+                print("对方服务器出错{}".format(res.get("msg")))
+                self.redis_client.lpush(self.lKey,ordercode)
+                return
+
+            if str(res.get("data").get("payStatus")) != "1":
+                if str(res.get("data").get("payStatus")) == "0":
+                    self.redis_client.lpush(self.lKey,ordercode)
+                print("充值未成功!")
+                return
+
+            if str(res.get("data").get("examineStatus")) != "2":
+                if str(res.get("data").get("examineStatus")) == "1":
+                    self.redis_client.lpush(self.lKey,ordercode)
+                print("审核未成功!")
+                return
+
+            print(res)
+
+            request_data = {
+                "orderid": ordercode
+            }
+
+            result = request('POST',
+                             url=urllib.parse.unquote('http://allwin6666.com/callback_api/lastpass/jingdong_callback'),
+                             data=request_data,
+                             json=request_data, verify=False)
+
+            if result.text != 'success':
+                print("请求对方服务器错误{}:{}".format(str(result.text), ordercode))
 
 if __name__=="__main__":
 

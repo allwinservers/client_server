@@ -9,6 +9,7 @@ class Order(models.Model):
     ordercode = models.BigAutoField(primary_key=True,verbose_name="订单ID")
     userid = models.BigIntegerField(verbose_name="商户号",default=0)
     down_ordercode = models.CharField(verbose_name='下游订单号',default='',max_length=60)
+    last_ordercode = models.CharField(verbose_name='上游订单号',default='',max_length=60)
     paypass = models.IntegerField(verbose_name="支付渠道",default=0)
     paypassname = models.CharField(verbose_name="支付渠道名称",default="",max_length=60)
 
