@@ -4601,7 +4601,7 @@ class LastPass_GCPAYS(LastPassBase):
     def df_api(self,data):
 
         self.sso()
-        url = self.create_order_url + '/paid//customer/send/order'
+        url = self.create_order_url + '/paid/customer/send/pay/order'
 
         data['sign'] = md5pass("{}{}{}{}{}{}".format(
             str(self.appId),
@@ -4632,14 +4632,16 @@ class LastPass_GCPAYS(LastPassBase):
             str(self.keyStore),
         ))
 
-        url = self.create_order_url + '/paid/query/in/order/id/{}/{}'.format(data.get("orderNo"),data.get("sign"))
+        url = self.create_order_url + '/paid/query/out/order/id/{}/{}'.format(data.get("orderNo"),data.get("sign"))
 
         print(data)
-        result = request('POST', url=url, json=data, verify=False,
+        print(url)
+        result = request('POST', url=url, verify=False,
                          headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
 
         res = json.loads(result.content.decode('utf-8'))
         print(res)
+        print(self.token)
         if res.get("code") != 0:
             raise PubErrorCustom(res.get("msg"))
 
