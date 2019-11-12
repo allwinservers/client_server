@@ -776,7 +776,7 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector()
     def daifuPassList(self,request, *args, **kwargs):
 
-        check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
+        # check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
 
         QueryObj=PayPass.objects.filter(status__in=[0, 1],isdayfu='0')
 
@@ -791,8 +791,7 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector(transaction=True)
     def daifuOrderQuery(self,request, *args, **kwargs):
 
-        check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
-
+        # check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
         if not request.data_format.get("dfordercode"):
             raise PubErrorCustom("订单号不能为空!")
 
@@ -831,7 +830,7 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector(transaction=True)
     def daifuBalTixian(self,request, *args, **kwargs):
 
-        check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
+        # check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
 
 
         if str(request.data_format.get('paypassid')) == '54':
@@ -960,7 +959,7 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector()
     def daifuBalQuery(self,request, *args, **kwargs):
 
-        check_df_ip(request.user.userid,request.META.get("HTTP_X_REAL_IP"))
+        # check_df_ip(request.user.userid,request.META.get("HTTP_X_REAL_IP"))
 
         if str(request.query_params_format.get("paypassid")) == '54':
 
