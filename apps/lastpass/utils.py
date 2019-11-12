@@ -4509,7 +4509,7 @@ class LastPass_GCPAYS(LastPassBase):
         super().__init__(**kwargs)
 
         # 订单生成地址
-        self.create_order_url = "http://47.97.62.178"
+        self.create_order_url = "http://www.gcpayz.com"
 
         self.appId = "G11959365W92A99213979DA592"
         self.appSecret = "12acb033b3065ae85306969c95ae40ecfee40cf7"
