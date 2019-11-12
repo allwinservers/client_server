@@ -4649,14 +4649,14 @@ class LastPass_GCPAYS(LastPassBase):
             raise PubErrorCustom(res.get("msg"))
 
         if not res.get("data",None):
-            raise PubErrorCustom("充值失败!")
+            raise PubErrorCustom("支付失败!")
 
         if str(res.get("data").get("payStatus")) == '0':
-            return "充值中"
+            return "支付中"
         elif str(res.get("data").get("payStatus")) == '1':
-            return "充值成功"
+            return "支付成功"
         else:
-            return "充值失败"
+            return "支付失败"
 
     def df_bal_query(self):
         self.sso()
