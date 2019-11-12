@@ -4620,10 +4620,6 @@ class LastPass_GCPAYS(LastPassBase):
 
         print(res)
 
-        if res.get("code") == 50002:
-            self.token = None
-            self.sso()
-
         if res.get("code") != 0:
             raise PubErrorCustom(res.get("msg"))
 
@@ -4647,10 +4643,6 @@ class LastPass_GCPAYS(LastPassBase):
         print(res)
         print(self.token)
 
-        if res.get("code") == 50002:
-            self.token = None
-            self.sso()
-
         if res.get("code") != 0:
             raise PubErrorCustom(res.get("msg"))
 
@@ -4672,11 +4664,6 @@ class LastPass_GCPAYS(LastPassBase):
                          headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
 
         res = json.loads(result.content.decode('utf-8'))
-
-        print(res)
-        if res.get("code") == 50002:
-            self.token = None
-            self.sso()
 
         if res.get("code") != 0:
             raise PubErrorCustom(res.get("msg"))
