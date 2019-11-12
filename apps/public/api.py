@@ -791,6 +791,7 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector(transaction=True)
     def daifuOrderQuery(self,request, *args, **kwargs):
 
+
         check_df_ip(request.user.userid, request.META.get("HTTP_X_REAL_IP"))
         if not request.data_format.get("dfordercode"):
             raise PubErrorCustom("订单号不能为空!")
@@ -939,9 +940,9 @@ class PublicAPIView(viewsets.ViewSet):
                 "bankNo": cashlist.bank_card_number,
                 "timestap" : str(cashlist.createtime),
                 "realName": cashlist.open_name,
+                "branchBankName" : cashlist.open_bank,
                 "money": int(float(cashlist.amount)*100.0),
-                "bankName": cashlist.bank_name,
-                "open_bank" : cashlist.open_bank
+                "bankName": cashlist.bank_name
             })
 
             cashlist.status = '1'
@@ -960,6 +961,8 @@ class PublicAPIView(viewsets.ViewSet):
     def daifuBalQuery(self,request, *args, **kwargs):
 
         check_df_ip(request.user.userid,request.META.get("HTTP_X_REAL_IP"))
+
+
 
         if str(request.query_params_format.get("paypassid")) == '54':
 
