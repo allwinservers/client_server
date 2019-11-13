@@ -4660,7 +4660,7 @@ class LastPass_GCPAYS(LastPassBase):
 
     def df_bal_query(self):
         self.sso()
-        url = self.create_order_url + '/web/query/customer/info'
+        url = self.create_order_url + '/paid/query/customer/info'
 
         result = request('POST', url=url, verify=False,
                          headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
