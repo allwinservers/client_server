@@ -174,7 +174,7 @@ class BalList(models.Model):
     bal = models.DecimalField(max_digits=18, decimal_places=6, default=0.000, verbose_name="交易前金额")
     confirm_bal = models.DecimalField(max_digits=18, decimal_places=6, default=0.000, verbose_name="交易后金额")
     memo = models.CharField(max_length=255,verbose_name="交易摘要")
-    ordercode = models.BigIntegerField(default=0,verbose_name="订单号")
+    ordercode = models.CharField(max_length=120,default='0',verbose_name="订单号")
     memo1 = models.CharField(max_length=255, verbose_name="交易摘要",default="1")
 
     createtime = models.BigIntegerField()
