@@ -141,7 +141,7 @@ class PayAPIView(viewsets.ViewSet):
         else:
             raise PubErrorCustom("用户类型有误!")
 
-        res = query.order_by('-createtime')
+        res = query.order_by('-createtime','-id')
         headers = {
             'Total': res.count(),
         }
