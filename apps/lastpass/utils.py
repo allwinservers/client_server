@@ -4577,8 +4577,8 @@ class LastPass_GCPAYS(LastPassBase):
             raise PubErrorCustom("开户人不能为空!")
 
 
-        if not luhn.is_valid(self.data.get("bankCardNo")):
-            raise PubErrorCustom("银行卡不合法!")
+        # if not luhn.is_valid(self.data.get("bankCardNo")):
+        #     raise PubErrorCustom("银行卡不合法!")
 
         # try:
         #     orderObj = Order.objects.select_for_update().get(ordercode=self.data.get("ordercode"))
