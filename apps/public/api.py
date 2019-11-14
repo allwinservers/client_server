@@ -762,9 +762,7 @@ class PublicAPIView(viewsets.ViewSet):
 
         # user = upd_bal(userid=self.request.user.userid,cashout_bal = self.request.data_format.get("amount"))
 
-        user = AccountCashout(userid=self.request.user.userid,amount=self.request.data_format.get("amount")).run()
-
-        CashoutList.objects.create(**{
+        cashlist = CashoutList.objects.create(**{
             "userid" : self.request.user.userid ,
             "name" : self.request.user.name,
             "amount" : self.request.data_format.get("amount") ,
@@ -774,6 +772,11 @@ class PublicAPIView(viewsets.ViewSet):
             "bank_card_number" : self.request.data_format.get("bank")['bank_card_number'],
             "status" : "0"
         })
+
+        cashlist.downordercode = "%08d" % cashlist.id
+        cashlist.save()
+
+        user = AccountCashout(userid=self.request.user.userid,amount=self.request.data_format.get("amount"),ordercode=cashlist.downordercode).run()
 
         return {"data": {"bal": round(user.bal, 2), "cashout_bal": round(user.cashout_bal, 2)}}
 
@@ -1053,8 +1056,8 @@ class PublicAPIView(viewsets.ViewSet):
             user = Users.objects.select_for_update().get(userid=self.request.data_format.get("userid"))
         except Users.DoesNotExist:
             raise PubErrorCustom("无对应用户信息({})".format(self.request.data_format.get("userid")))
-        AccountCashoutConfirm(user=user, amount=cashlist.amount).run()
         AccountCashoutConfirmFee(user=user).run()
+        AccountCashoutConfirm(user=user, amount=cashlist.amount).run()
 
         return None
 
