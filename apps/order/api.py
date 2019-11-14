@@ -222,8 +222,10 @@ class OrderAPIView(GenericViewSetCustom):
 
         QuerySet = CashoutList.objects.all()
 
-        if self.request.user.rolecode in ["1005"]:
+        if self.request.user.rolecode in ["1000", "1001", "1005"]:
             pass
+        elif self.request.user.rolecode == '2001':
+            QuerySet = QuerySet.filter(userid=self.request.user.userid)
         else:
             raise PubErrorCustom("用户类型有误!")
 

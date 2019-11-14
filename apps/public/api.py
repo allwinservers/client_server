@@ -1699,7 +1699,8 @@ class PublicAPIView(viewsets.ViewSet):
                     "name": '订单管理',
                     "iconCls": 'el-icon-s-order',
                     "children": [
-                        {"path": '/orderlist_other', "component": "orderlist_other", "name": '订单列表'}
+                        {"path": '/orderlist_other', "component": "orderlist_other", "name": '订单列表'},
+                        {"path": '/cashoutlist_df', "component": "cashoutlist_df", "name": '代付订单列表'}
                     ]
                 },
                 {
@@ -1720,7 +1721,7 @@ class PublicAPIView(viewsets.ViewSet):
                     "children": [
                         {"path": '/rate', "component": "rate", "name": '费率'},
                         # {"path": '/bankinfo', "component": "bankinfo", "name": '银行卡设置'},
-                        {"path": '/cashout', "component": "cashout", "name": '提现申请'},
+                        {"path": '/cashout_sb', "component": "cashout_sb", "name": '提现申请'} if self.request.user.userid in [170] else {"path": '/cashout', "component": "cashout", "name": '提现申请'},
                         {"path": '/cashoutlist', "component": "cashoutlist", "name": '提现申请记录'},
                         {"path": '/cashoutlist1', "component": "cashoutlist1", "name": '打款记录'},
                     ]
