@@ -81,7 +81,7 @@ class UsersSerializer(serializers.Serializer):
 class BallistSerializer(serializers.Serializer):
     userid = serializers.IntegerField()
 
-    ordercode = serializers.IntegerField()
+    ordercode = serializers.CharField()
     memo = serializers.SerializerMethodField()
 
     bal = serializers.DecimalField(max_digits=18, decimal_places=2)
