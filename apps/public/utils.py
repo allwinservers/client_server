@@ -31,7 +31,7 @@ class CheckIpForDf(CheckIpBase):
 
     def run(self):
         isIpValid = False
-        for item in self.data[0]['webobj'].split(','):
+        for item in self.data[0]['dfobj'].split(','):
             if str(item) == str(self.ip):
                 isIpValid = True
                 break
@@ -44,8 +44,9 @@ class CheckIpForLogin(CheckIpBase):
         super().__init__(**kwargs)
 
     def run(self):
+        print(self.userid,self.ip)
         isIpValid = False
-        for item in self.data[0]['dfobj'].split(','):
+        for item in self.data[0]['webobj'].split(','):
             if str(item) == str(self.ip):
                 isIpValid = True
                 break
