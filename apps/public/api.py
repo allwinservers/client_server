@@ -48,11 +48,49 @@ from apps.utils import RedisQQbot
 from apps.cache.utils import RedisCaCheHandler
 from apps.public.models import WhiteList
 from apps.public.serializers import WhiteListModelSerializer
+from apps.lastpass.utils import LastPass_GCPAYS
+from apps.business.utils import CreateOrder
+from libs.utils.db import RedisIdGeneratorForOrder
 
 class PublicAPIView(viewsets.ViewSet):
 
     def get_authenticators(self):
         return [auth() for auth in [Authentication]]
+
+
+    #充值
+    @list_route(methods=['POST'])
+    @Core_connector(transaction=True)
+    def neichong(self,request,*args, **kwargs):
+
+        bankCardNo = self.request.data_format['bank']['bank_card_number']
+        custName = self.request.data_format['bank']['open_name']
+
+        data={
+            "businessid" : self.request.user.userid,
+            "paytypeid" : "23",
+            "down_ordercode" : RedisIdGeneratorForOrder().run(),
+            "amount" : request.data_format.get("amount"),
+            "client_ip" : "localhost",
+            "notifyurl" : "http://allwin6666.com/api/paycall/wechat_test",
+            "ismobile" : "1"
+        }
+        obj = CreateOrder(user=request.user, request_param=data, lock="1")
+
+        obj.check_request_param()
+        obj.create_order_handler()
+
+        obj.order.bankno = bankCardNo
+        obj.order.open_name = custName
+        obj.order.save()
+
+
+        return LastPass_GCPAYS(data={
+            "bankCardNo": obj.order.bankno,
+            "custName" : obj.order.open_name,
+            "ordercode" : obj.order.ordercode,
+            "amount" : obj.order.amount
+        }).run()
 
 
     #刷新所有支付方式缓存数据
@@ -786,7 +824,6 @@ class PublicAPIView(viewsets.ViewSet):
 
 
     #代付订单查询
-    #代付提现
     @list_route(methods=['POST'])
     @Core_connector(transaction=True)
     def daifuOrderQuery(self,request, *args, **kwargs):
@@ -1645,6 +1682,15 @@ class PublicAPIView(viewsets.ViewSet):
                     "children": [
                         {"path": '/passwd', "component": "passwd", "name": '密码修改'},
                         {"path": '/paypasswd', "component": "paypasswd", "name": '支付密码修改'}
+                    ]
+                },
+                {
+                    "path": '/chongzhi',
+                    "component": "Home",
+                    "name": '充值管理',
+                    "iconCls": 'el-icon-s-finance',
+                    "children": [
+                        {"path": '/neichong', "component": "neichong", "name": '充值'}
                     ]
                 },
                 {
