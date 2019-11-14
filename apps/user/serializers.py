@@ -139,6 +139,26 @@ class BusinessSerializer(serializers.Serializer):
 
     paytypes = serializers.SerializerMethodField()
 
+    islogin_format = serializers.SerializerMethodField()
+    istixianpage_format = serializers.SerializerMethodField()
+
+    islogin = serializers.CharField()
+
+    istixianpage = serializers.CharField()
+
+    def get_islogin_format(self,obj):
+        if obj.islogin == '0':
+            return '是'
+        else:
+            return '否'
+
+    def get_istixianpage_format(self,obj):
+        if obj.istixianpage == '0':
+            return '是'
+        else:
+            return '否'
+
+
     def get_fee_rule(self,obj):
         if obj.fee_rule <= 0.0:
             fee = get_fee_rule_forSys()

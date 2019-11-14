@@ -8,6 +8,50 @@ from utils.exceptions import PubErrorCustom
 from apps.cache.utils import RedisCaCheHandler
 
 
+class CheckIpBase(object):
+    def __init__(self,**kwargs):
+
+        self.userid = kwargs.get("userid",None)
+        self.ip = kwargs.get("ip",None)
+
+        self.data = RedisCaCheHandler(
+            method="filter",
+            serialiers="WhiteListModelSerializerToRedis",
+            table="whitelist",
+            filter_value={
+                "userid": self.userid
+            }
+        ).run()
+        if not len(self.data):
+            raise PubErrorCustom("拒绝访问!")
+
+class CheckIpForDf(CheckIpBase):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+
+    def run(self):
+        isIpValid = False
+        for item in self.data[0]['webobj'].split(','):
+            if str(item) == str(self.ip):
+                isIpValid = True
+                break
+        if not isIpValid:
+            raise PubErrorCustom("拒绝访问!")
+
+
+class CheckIpForLogin(CheckIpBase):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def run(self):
+        isIpValid = False
+        for item in self.data[0]['dfobj'].split(','):
+            if str(item) == str(self.ip):
+                isIpValid = True
+                break
+        if not isIpValid:
+            raise PubErrorCustom("拒绝访问!")
+
 def check_df_ip(userid,ip):
     print(userid,ip)
 
@@ -33,6 +77,8 @@ def check_df_ip(userid,ip):
 
     if not isIpValid:
         raise PubErrorCustom("拒绝访问!")
+
+
 
 
 

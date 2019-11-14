@@ -70,6 +70,11 @@ class CashoutListModelSerializer(serializers.ModelSerializer):
     amount = serializers.DecimalField(max_digits=18, decimal_places=2)
     ordercode = serializers.SerializerMethodField()
 
+    no = serializers.SerializerMethodField()
+
+
+    def get_no(self,obj):
+        return obj.downordercode
 
     def get_ordercode(self,obj):
 

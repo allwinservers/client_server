@@ -156,15 +156,14 @@ class SysNumber(models.Model):
         db_table = 'sysnumber'
 
 
-
 class WhiteList(models.Model):
 
     id=models.BigAutoField(primary_key=True)
     userid  = models.BigIntegerField(default=0,verbose_name="用户iD")
 
-    dfobj = models.CharField(default='',verbose_name="代付白名单",max_length=512)
-    webobj = models.CharField(default='',verbose_name="客户端登录白名单",max_length=512)
-    orderobj = models.CharField(default="",verbose_name="申请订单白名单",max_length=512)
+    dfobj = models.CharField(default='',verbose_name="代付白名单",max_length=512,null=True)
+    webobj = models.CharField(default='',verbose_name="客户端登录白名单",max_length=512,null=True)
+    orderobj = models.CharField(default="",verbose_name="申请订单白名单",max_length=512,null=True)
 
     class Meta:
         verbose_name = '白名单'

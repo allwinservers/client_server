@@ -3,6 +3,7 @@ from utils.log import logger
 from core.http.response import res_code, ResCode
 from apps.user.models import Users,Token,Role
 
+# from apps.public.utils import CheckIpForLogin
 
 def get_user(request):
     """
@@ -21,6 +22,8 @@ def get_user(request):
 
     user=Users.objects.get(userid=result.userid)
     user.rolename = Role.objects.get(rolecode=user.rolecode).name
+
+
     if user.status == 1:
         return (None, '登录账号不存在!',200, ResCode.Token_Missing)
     elif user.status == 2:

@@ -75,7 +75,7 @@ class PublicAPIView(viewsets.ViewSet):
             "notifyurl" : "http://allwin6666.com/api/paycall/wechat_test",
             "ismobile" : "1"
         }
-        obj = CreateOrder(user=request.user, request_param=data, lock="1")
+        obj = CreateOrder(user=request.user, request_param=data, lock="0")
 
         obj.check_request_param()
         obj.create_order_handler()
@@ -1721,7 +1721,7 @@ class PublicAPIView(viewsets.ViewSet):
                     "children": [
                         {"path": '/rate', "component": "rate", "name": '费率'},
                         # {"path": '/bankinfo', "component": "bankinfo", "name": '银行卡设置'},
-                        {"path": '/cashout_sb', "component": "cashout_sb", "name": '提现申请'} if self.request.user.userid in [170] else {"path": '/cashout', "component": "cashout", "name": '提现申请'},
+                        {"path": '/cashout_sb', "component": "cashout_sb", "name": '提现申请'} if self.request.user.istixianpage != '0' else {"path": '/cashout', "component": "cashout", "name": '提现申请'},
                         {"path": '/cashoutlist', "component": "cashoutlist", "name": '提现申请记录'},
                         {"path": '/cashoutlist1', "component": "cashoutlist1", "name": '打款记录'},
                     ]

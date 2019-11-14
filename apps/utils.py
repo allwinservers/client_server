@@ -103,3 +103,8 @@ class RedisQQbot(RedisHandler):
     def redis_get_dict_keys(self):
         res = self.redis_client.hkeys(self.key)
         return res
+
+
+
+
+

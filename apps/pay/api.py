@@ -9,6 +9,7 @@ from apps.pay.serializers import PayTypeModelSerializer,PayTypeModelSerializer1,
 from apps.pay.models import PayType,PayPass,PayPassLinkType,BankInfo
 
 from apps.user.serializers import BallistSerializer
+from libs.utils.mytime import send_toTimestamp
 from apps.user.models import BalList,UserLink
 
 from auth.authentication import Authentication
@@ -101,8 +102,19 @@ class PayAPIView(viewsets.ViewSet):
 
         query = BalList.objects.all()
 
+
         if self.request.query_params_format.get("memo"):
-            query = query.filter(memo=self.request.query_params_format.get("memo"))
+            query = query.filter(memo__contains=self.request.query_params_format.get("memo"))
+
+        if request.query_params_format.get("startdate") and request.query_params_format.get("enddate"):
+            query = query.filter(
+                createtime__lte=send_toTimestamp(request.query_params_format.get("enddate")),
+                createtime__gte=send_toTimestamp(request.query_params_format.get("startdate")))
+
+        if self.request.query_params_format.get("ordercode"):
+
+            query = query.filter(ordercode=self.request.query_params_format.get("ordercode"))
+
 
         if request.user.rolecode in ["1000","1001"]:
             if self.request.query_params_format.get("userid"):
@@ -138,6 +150,8 @@ class PayAPIView(viewsets.ViewSet):
         page_size=int(request.query_params_format.get('page_size'))
         page_start = page_size * page - page_size
         page_end = page_size * page
+
+        # print(page,page_size,page_start,page_end)
 
         return {"data":BallistSerializer(res[page_start:page_end],many=True).data,"header":headers}
 

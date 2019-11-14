@@ -95,6 +95,10 @@ class Users(models.Model):
 
     fee_rule = models.DecimalField(max_digits=18,decimal_places=6,default=0.000,verbose_name="该商户收取多少手续费")
 
+
+    islogin = models.CharField(max_length=1,verbose_name="是否单点登录,0-是,1-否",default="0")
+    istixianpage = models.CharField(max_length=1,verbose_name="是否设置提现保存银行卡信息,0-是,1-否",default="0")
+
     rolename  = None
     level = None
     name_to = None
