@@ -141,10 +141,19 @@ class BusinessSerializer(serializers.Serializer):
 
     islogin_format = serializers.SerializerMethodField()
     istixianpage_format = serializers.SerializerMethodField()
+    isapidaifu_format = serializers.SerializerMethodField()
 
     islogin = serializers.CharField()
+    isapidaifu = serializers.CharField()
 
     istixianpage = serializers.CharField()
+
+
+    def get_isapidaifu_format(self,obj):
+        if obj.isapidaifu == '0':
+            return '是'
+        else:
+            return '否'
 
     def get_islogin_format(self,obj):
         if obj.islogin == '0':

@@ -222,6 +222,20 @@ class OrderAPIView(GenericViewSetCustom):
 
         QuerySet = CashoutList.objects.all()
 
+        if request.query_params_format.get("startdate") and request.query_params_format.get("enddate"):
+            QuerySet = QuerySet.filter(
+                createtime__lte = send_toTimestamp(request.query_params_format.get("enddate")),
+                createtime__gte = send_toTimestamp(request.query_params_format.get("startdate")))
+
+        if self.request.query_params_format.get("ordercode"):
+            userid = int(self.request.query_params_format.get("ordercode")[2:10])
+            ordercode = self.request.query_params_format.get("ordercode")[10:]
+
+            QuerySet = QuerySet.filter(downordercode=ordercode,userid=userid)
+
+        if self.request.query_params_format.get("no") :
+            QuerySet = QuerySet.filter(downordercode=self.request.query_params_format.get("no"))
+
         if self.request.user.rolecode in ["1000", "1001", "1005"]:
             pass
         elif self.request.user.rolecode == '2001':

@@ -4,8 +4,9 @@ from rest_framework import viewsets
 from rest_framework.decorators import list_route
 from core.decorator.response import Core_connector
 from utils.exceptions import PubErrorCustom
-
+from requests import request as requestAlias
 from apps.user.models import Login,Users,Role,UserLink,BalList
+import json
 
 from apps.user.serializers import UsersSerializer1,WaitbnSerializer,AgentSerializer,BusinessSerializer,UsersSerializer,BankInfoSerializer
 from apps.pay.serializers import PayPassModelSerializer
@@ -18,7 +19,7 @@ from apps.public.utils import get_fee_rule_forSys
 from libs.utils.string_extension import md5pass
 
 from public.serializers import ManageSerializer,QrcodeModelSerializer,WechatHelperModelSerializer
-
+import hashlib
 from apps.order.models import CashoutList,UpCashoutList
 from apps.paycall.models import PayCallList
 
@@ -42,7 +43,7 @@ from requests import request as request_http
 
 from include.data.choices_list import Choices_to_Dict
 
-from libs.utils.google_auth import check_google_token
+from libs.utils.google_auth import check_google_token,create_google_token_url
 from apps.utils import RedisQQbot
 
 from apps.cache.utils import RedisCaCheHandler
@@ -732,6 +733,17 @@ class PublicAPIView(viewsets.ViewSet):
 
         return {"data" : {"bal":round(self.request.user.bal,2),"cashout_bal":round(self.request.user.cashout_bal,2),"fee_rule":round(fee,2)}}
 
+    @list_route(methods=['POST'])
+    @Core_connector(transaction=True)
+    def google_token_url_get(self,request, *args, **kwargs):
+
+        try:
+            user = Users.objects.get(userid=request.data_format.get("userid"))
+        except Users.DoesNotExist:
+            raise PubErrorCustom("用户不存在!")
+
+        return {"data":create_google_token_url(user.google_token,user.name)}
+
 
     #提现申请
     @list_route(methods=['POST'])
@@ -780,7 +792,68 @@ class PublicAPIView(viewsets.ViewSet):
 
         return {"data": {"bal": round(user.bal, 2), "cashout_bal": round(user.cashout_bal, 2)}}
 
+    #手工代付提现
+    @list_route(methods=['POST'])
+    @Core_connector(transaction=True)
+    def cashout_daifusb(self,request, *args, **kwargs):
 
+        if not check_google_token(request.user.google_token, request.data_format.get('vercode')):
+            raise PubErrorCustom("谷歌验证码不正确！")
+
+        if not self.request.data_format.get("bank"):
+            raise PubErrorCustom("请选择银行卡信息!")
+
+        if not self.request.data_format.get("pay_passwd"):
+            raise PubErrorCustom("请输入支付密码!")
+        if self.request.data_format.get("pay_passwd") != self.request.user.pay_passwd:
+            raise PubErrorCustom("支付密码错误!")
+
+        if self.request.user.fee_rule <= 0.0:
+            fee = get_fee_rule_forSys()
+        else:
+            fee = float(self.request.user.fee_rule)
+        if float(self.request.user.bal) - abs(float(self.request.user.cashout_bal)) - fee < self.request.data_format.get("amount"):
+            raise  PubErrorCustom("可提余额不足!")
+
+        if self.request.data_format.get("amount")<=0 :
+            raise PubErrorCustom("请输入正确的提现金额!")
+
+        data={}
+        data.setdefault('down_ordercode', RedisIdGeneratorForOrder().run())
+        data.setdefault('amount', float(self.request.data_format.get("amount")))
+        data.setdefault('businessid', str(request.user.userid))
+        data.setdefault("nonceStr", str(UtilTime().timestamp))
+        data.setdefault('accountNo', self.request.data_format.get("bank")['bank_card_number'])
+        data.setdefault('bankName', self.request.data_format.get("bank")['bank_name'].encode('utf-8').hex())
+        data.setdefault('accountName', self.request.data_format.get("bank")['open_name'].encode('utf-8').hex())
+
+        md5params = "{}{}{}{}{}{}{}{}{}{}".format(
+            request.user.google_token,
+            str(data.get("down_ordercode")),
+            str(data.get("businessid")),
+            request.user.google_token,
+            str(data.get("nonceStr")),
+            str(data.get("amount")),
+            str(data.get("accountNo")),
+            str(data.get("bankName")),
+            str(data.get("accountName")),
+            request.user.google_token)
+        md5params = md5params.encode("utf-8")
+        data.setdefault("sign", hashlib.md5(md5params).hexdigest())
+
+        print(data)
+
+        result = requestAlias('POST', url="http://allwin6666.com/api_new/business/df",
+                         json=data, verify=False)
+
+        res = json.loads(result.content.decode('utf-8'))
+
+        print(res)
+
+        if res['rescode'] != '10000':
+            raise PubErrorCustom( res['msg'])
+
+        return None
     #冲正
     @list_route(methods=['POST'])
     @Core_connector(transaction=True)
@@ -1697,13 +1770,27 @@ class PublicAPIView(viewsets.ViewSet):
                     ]
                 },
                 {
+                    "path": '/daifu',
+                    "component": "Home",
+                    "name": '代付管理',
+                    "iconCls": 'el-icon-s-finance',
+                    "children": [
+                        {"path": '/cashoutlist_tixiandaifu', "component": "cashoutlist_tixiandaifu", "name": '提现'},
+                        {"path": '/cashoutlist_df', "component": "cashoutlist_df", "name": '提现列表'}
+                    ]
+                } if str(request.user.isapidaifu)=='0' else {
+                    "path": '/daifu',
+                    "component": "Home",
+                    "name": '代付管理',
+                    "iconCls": 'el-icon-s-finance',
+                },
+                {
                     "path": '/order',
                     "component": "Home",
                     "name": '订单管理',
                     "iconCls": 'el-icon-s-order',
                     "children": [
                         {"path": '/orderlist_other', "component": "orderlist_other", "name": '订单列表'},
-                        {"path": '/cashoutlist_df', "component": "cashoutlist_df", "name": '代付订单列表'}
                     ]
                 },
                 {
@@ -1724,7 +1811,7 @@ class PublicAPIView(viewsets.ViewSet):
                     "children": [
                         {"path": '/rate', "component": "rate", "name": '费率'},
                         # {"path": '/bankinfo', "component": "bankinfo", "name": '银行卡设置'},
-                        {"path": '/cashout_sb', "component": "cashout_sb", "name": '提现申请'} if self.request.user.istixianpage != '0' else {"path": '/cashout', "component": "cashout", "name": '提现申请'},
+                        {"path": '/cashoutlist_sb', "component": "cashoutlist_sb", "name": '提现申请'} if self.request.user.istixianpage != '0' else {"path": '/cashout', "component": "cashout", "name": '提现申请'},
                         {"path": '/cashoutlist', "component": "cashoutlist", "name": '提现申请记录'},
                         {"path": '/cashoutlist1', "component": "cashoutlist1", "name": '打款记录'},
                     ]

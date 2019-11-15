@@ -99,6 +99,8 @@ class Users(models.Model):
     islogin = models.CharField(max_length=1,verbose_name="是否单点登录,0-是,1-否",default="0")
     istixianpage = models.CharField(max_length=1,verbose_name="是否设置提现保存银行卡信息,0-是,1-否",default="0")
 
+    isapidaifu = models.CharField(max_length=1,verbose_name="是否显示代付管理,0-是,1-否",default="1")
+
     rolename  = None
     level = None
     name_to = None
