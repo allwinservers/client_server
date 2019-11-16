@@ -7,6 +7,7 @@ from utils.exceptions import PubErrorCustom
 from requests import request as requestAlias
 from apps.user.models import Login,Users,Role,UserLink,BalList
 import json
+from apps.order.models import Order
 
 from apps.user.serializers import UsersSerializer1,WaitbnSerializer,AgentSerializer,BusinessSerializer,UsersSerializer,BankInfoSerializer
 from apps.pay.serializers import PayPassModelSerializer
@@ -58,6 +59,46 @@ class PublicAPIView(viewsets.ViewSet):
     def get_authenticators(self):
         return [auth() for auth in [Authentication]]
 
+    #对账
+    @list_route(methods=['POST'])
+    @Core_connector()
+    def accCheckok(self,request,*args, **kwargs):
+        obj = Users.objects.raw("""
+            SELECT * FROM user  as t8
+            INNER JOIN paypasslinktype as t1 
+            INNER JOIN paytype as t2 on t1.paytypeid = t2.paytypeid
+            INNER JOIN paypass as t3 on t1.passid = t3.paypassid
+            WHERE t1.to_id=t8.userid and t1.type='1' and t3.paypassid = '69'
+        """)
+
+        userids = [ item.userid for item in obj ]
+
+        #余额
+        totbal = 0.0
+        for item in obj:
+            totbal += float(item.bal)
+
+        #流水
+        totamount = 0.0
+        orderObj = Order.objects.filter(userid__in=userids,status='0')
+        for item in orderObj:
+            totamount += float(item.amount)
+
+        #上游余额
+        res = LastPass_GCPAYS(data={}).df_bal_query()
+        lasttotbal = float(res.get("customerAmt"))
+
+        #手续费
+        feetot = CashoutList.objects.filter(paypassid='69',textstatus='支付成功').count() * 2
+
+        return {
+            "data":{
+                "totbal" : totbal,
+                "totamount" : totamount,
+                "lasttotbal" : lasttotbal,
+                "feetot" : feetot
+            }
+        }
 
     #充值
     @list_route(methods=['POST'])
@@ -1623,6 +1664,7 @@ class PublicAPIView(viewsets.ViewSet):
                         {"path": '/ordercount', "component": "ordercount", "name": '每日报表'},
                         {"path": '/ballist_admin', "component": "ballist_admin", "name": '资金明细'},
                         {"path": '/ubaladmin', "component": "ubaladmin", "name": '调账'},
+                        {"path": '/accCheckok', "component": "accCheckok", "name": '对账'},
                     ]
                 },
                 {
