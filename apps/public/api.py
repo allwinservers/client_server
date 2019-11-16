@@ -826,6 +826,7 @@ class PublicAPIView(viewsets.ViewSet):
         data.setdefault('accountNo', self.request.data_format.get("bank")['bank_card_number'])
         data.setdefault('bankName', self.request.data_format.get("bank")['bank_name'].encode('utf-8').hex())
         data.setdefault('accountName', self.request.data_format.get("bank")['open_name'].encode('utf-8').hex())
+        data.setdefault('memo',self.request.data_format.get("memo"))
 
         md5params = "{}{}{}{}{}{}{}{}{}{}".format(
             request.user.google_token,

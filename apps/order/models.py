@@ -90,6 +90,9 @@ class CashoutList(models.Model):
     downordercode = models.CharField(default='',max_length=120,verbose_name="商户订单号")
 
 
+    memo = models.CharField(max_length=255,verbose_name="备注",default="")
+
+
 
     def save(self, *args, **kwargs):
         t = time.mktime(timezone.now().timetuple())

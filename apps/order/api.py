@@ -222,6 +222,10 @@ class OrderAPIView(GenericViewSetCustom):
 
         QuerySet = CashoutList.objects.all()
 
+
+        if self.request.query_params_format.get("memo") :
+            QuerySet = QuerySet.filter(memo__contains=self.request.query_params_format.get("memo"))
+
         if request.query_params_format.get("startdate") and request.query_params_format.get("enddate"):
             QuerySet = QuerySet.filter(
                 createtime__lte = send_toTimestamp(request.query_params_format.get("enddate")),
