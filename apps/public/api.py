@@ -977,8 +977,8 @@ class PublicAPIView(viewsets.ViewSet):
             res=LastPass_GCPAYS().df_order_query(data={
                 "orderNo" : request.data_format.get("dfordercode")
             })
-            obj.textstatus = res
-            obj.save()
+            # obj.textstatus = res
+            # obj.save()
             return {"data":res}
 
     #代付提现
