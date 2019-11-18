@@ -1568,7 +1568,8 @@ class PublicAPIView(viewsets.ViewSet):
                     "name": '订单管理',
                     "iconCls": 'el-icon-s-order',
                     "children": [
-                        {"path": '/orderlist', "component": "orderlist", "name": '订单列表'}
+                        {"path": '/orderlist', "component": "orderlist", "name": '订单列表'},
+                        {"path": '/cashoutlist_admin_df', "component": "cashoutlist_admin_df", "name": '代付订单列表'}
                     ]
                 },
                 {
@@ -1688,7 +1689,18 @@ class PublicAPIView(viewsets.ViewSet):
                     "name": '订单管理',
                     "iconCls": 'el-icon-s-order',
                     "children": [
-                        {"path": '/orderlist', "component": "orderlist", "name": '订单列表'}
+                        {"path": '/orderlist', "component": "orderlist", "name": '订单列表'},
+                        {"path": '/cashoutlist_admin_df', "component": "cashoutlist_admin_df", "name": '代付订单列表'}
+                    ]
+                },
+                {
+                    "path": '/sys',
+                    "component": "Home",
+                    "name": '系统管理',
+                    "iconCls": 'el-icon-s-order',
+                    "children": [
+                        {"path": '/whitelist', "component": "whitelist", "name": '白名单管理'},
+                        {"path": '/cache', "component": "cache", "name": '缓存管理'}
                     ]
                 },
                 # {
@@ -1750,7 +1762,7 @@ class PublicAPIView(viewsets.ViewSet):
                         {"path": '/cashout_daifu', "component": "cashout_daifu", "name": '申请提现(代付)'},
                         {"path": '/cashoutlist_admin_df', "component": "cashoutlist_admin_df", "name": '提现记录(代付)'}
                     ]
-                }
+                },
                 # {
                 #     "path": '/cqmanage',
                 #     "component": "Home",
