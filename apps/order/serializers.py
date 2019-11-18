@@ -79,8 +79,10 @@ class CashoutListModelSerializer(serializers.ModelSerializer):
             return "支付中"
         elif obj.df_status == '1':
             return "支付成功"
-        else:
+        elif obj.df_status == '2':
             return "支付失败"
+        else:
+            return "未知"
 
     def get_no(self,obj):
         return obj.downordercode
