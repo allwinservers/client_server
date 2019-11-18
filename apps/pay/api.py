@@ -1,3 +1,5 @@
+
+import json
 from rest_framework import viewsets
 from rest_framework.decorators import list_route
 from core.decorator.response import Core_connector
@@ -165,11 +167,10 @@ class PayAPIView(viewsets.ViewSet):
     def paypass_add(self,request, *args, **kwargs):
 
         PayPass.objects.create(**{
-            "paycode" : request.data_format.get("paycode"),
             "name" : request.data_format.get("name"),
-            "passcode": request.data_format.get("passcode"),
             "concat": request.data_format.get("concat"),
-            "contype": request.data_format.get("contype")
+            "contype": request.data_format.get("contype"),
+            "callback_ip": request.data_format.get("callback_ip")
         })
         return None
 
@@ -178,11 +179,71 @@ class PayAPIView(viewsets.ViewSet):
     def paypass_del(self,request, *args, **kwargs):
 
         try:
-            pay=PayPass.objects.get(paypassid = request.data_format.get("paypassid"))
-            pay.status = 2
-            pay.save()
-        except PayPass.DoesNotExist:
-            raise PubErrorCustom("该支付渠道不存在!")
+            obj = PayPass.objects.get(paypassid=request.data_format.get("paypassid"))
+            obj.status=2
+            obj.save()
+        except PayPassLinkType.DoesNotExist:
+            raise PubErrorCustom("不存在此渠道!")
+
+        return None
+
+    @list_route(methods=['GET'])
+    @Core_connector()
+    def paypassRulesGet(self, request, *args, **kwargs):
+
+        try:
+            obj = PayPass.objects.get(paypassid=request.query_params_format.get("paypassid"))
+        except PayPassLinkType.DoesNotExist:
+            raise PubErrorCustom("不存在此渠道!")
+
+        data = dict()
+        if obj.rules:
+            for key, value in json.loads(obj.rules).items():
+                if isinstance(value,dict):
+                    for itemKey,itemValue in value.items():
+                        data["{}_{}".format(key,itemKey)] = itemValue
+                else:
+                    data[key] = value
+        return {"data":data}
+
+    @list_route(methods=['POST'])
+    @Core_connector(transaction=True)
+    def paypassRulesAdd(self,request, *args, **kwargs):
+        try:
+            obj = PayPass.objects.get(paypassid=request.data_format.get("paypassid"))
+        except PayPassLinkType.DoesNotExist:
+            raise PubErrorCustom("不存在此渠道!")
+
+        data = {}
+        for key,value in request.data_format.get("requestData").items():
+            if "$" in key:
+                continue
+            if key == 'requestData':
+                requestData=[]
+                for item in value:
+                    d=dict()
+                    for itemKey,itemValue in item.items():
+                        if "$" in itemKey:
+                            continue
+                        d[itemKey] = itemValue
+                    requestData.append(d)
+                data['requestData'] = requestData
+            else:
+                if "_" in key:
+                    innerKey = key.split("_")[0]
+                    innerKey1 = key.split("_")[1]
+                    if innerKey not in data:
+                        data[innerKey] = dict()
+
+                    data[innerKey][innerKey1] = value
+                else:
+                    data[key] = value
+
+
+        print(data)
+        obj.rules = json.dumps(data)
+        obj.save()
+
 
         return None
 
@@ -196,15 +257,16 @@ class PayAPIView(viewsets.ViewSet):
 
         return None
 
+
     @list_route(methods=['GET'])
     @Core_connector(pagination=True)
     def paypass_query(self, request, *args, **kwargs):
 
-        QueryObj=PayPass.objects.filter(status__in=[0, 1])
+        query=PayPass.objects.filter(status__in=[0, 1])
 
-        if request.query_params_format.get("id"):
-            QueryObj=QueryObj.filter(paypassid=request.query_params_format.get("id"))
-        return {"data" : PayPassModelSerializer(QueryObj,many=True).data}
+        if request.query_params_format.get("paypassid"):
+            query=query.filter(paypassid=request.query_params_format.get("paypassid"))
+        return {"data" : PayPassModelSerializer(query,many=True).data}
 
 
     @list_route(methods=['GET'])

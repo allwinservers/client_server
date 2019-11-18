@@ -6,6 +6,8 @@ from rest_framework.validators import UniqueTogetherValidator
 from apps.pay.models import PayType,PayPass,PayPassLinkType,BankInfo
 from libs.utils.mytime import timestamp_toTime
 
+from libs.utils.mytime import UtilTime
+
 class PayTypeModelSerializer(serializers.ModelSerializer):
 
     rate = serializers.DecimalField(max_digits=18,decimal_places=4)
@@ -26,26 +28,23 @@ class PayTypeModelSerializer1(serializers.ModelSerializer):
 class PayPassModelSerializer(serializers.ModelSerializer):
 
 
-    bal = serializers.DecimalField(max_digits=18,decimal_places=2)
+    createtime_format = serializers.SerializerMethodField()
+    status_format = serializers.SerializerMethodField()
+    isdayfu_format = serializers.SerializerMethodField()
+    custom_format = serializers.SerializerMethodField()
 
-    status_name = serializers.SerializerMethodField()
-    isdayfu_name = serializers.SerializerMethodField()
+    def get_createtime_format(self,obj):
+        return UtilTime().timestamp_to_string(obj.createtime)
 
+    def get_status_format(self,obj):
+        return "是" if obj.status=='0' else '否'
 
-    def get_isdayfu_name(self,obj):
+    def get_isdayfu_format(self,obj):
+        return "是" if obj.isdayfu=='0' else '否'
 
-        if str(obj.isdayfu) == '0':
-            return "是"
-        else:
-            return "否"
+    def get_custom_format(self,obj):
+        return "自定义" if obj.custom=='0' else '规则'
 
-    def get_status_name(self,obj):
-        if str(obj.status) == '0':
-            return '启用'
-        elif str(obj.status) == '1':
-            return '不启用'
-        elif str(obj.status) == '2':
-            return '删除'
 
     class Meta:
         model = PayPass

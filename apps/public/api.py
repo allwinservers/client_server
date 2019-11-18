@@ -1557,7 +1557,7 @@ class PublicAPIView(viewsets.ViewSet):
                     "name": '支付管理',
                     "iconCls": 'el-icon-s-finance',
                     "children": [
-                        {"path": '/paypass', "component": "paypass", "name": '支付渠道'},
+                        {"path": '/paypassNew', "component": "paypassNew", "name": '支付渠道'},
                         {"path": '/paytype', "component": "paytype", "name": '支付方式'},
                         {"path": '/cashoutlist1', "component": "cashoutlist1", "name": '打款记录'},
                     ]
@@ -1673,7 +1673,7 @@ class PublicAPIView(viewsets.ViewSet):
                     "name": '支付管理',
                     "iconCls": 'el-icon-s-finance',
                     "children": [
-                        {"path": '/paypass', "component": "paypass", "name": '支付渠道'},
+                        {"path": '/paypassNew', "component": "paypassNew", "name": '支付渠道'},
                         {"path": '/paytype', "component": "paytype", "name": '支付方式'},
                         # {"path": '/up_cashout', "component": "up_cashout", "name": '提现申请(码商)'},
                         # {"path": '/upcashoutlist_ss', "component": "upcashoutlist_ss", "name": '提现申请记录(码商)'},
