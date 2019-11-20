@@ -220,8 +220,20 @@ class OrderAPIView(GenericViewSetCustom):
     @Core_connector(pagination=True)
     def cashoutlist_df_query(self, request, *args, **kwargs):
 
-        QuerySet = CashoutList.objects.all()
+        QuerySet = CashoutList.objects.filter(paypassid__gt=0)
 
+
+        if self.request.query_params_format.get("bank_card_number") :
+            QuerySet = QuerySet.filter(bank_card_number__contains=self.request.query_params_format.get("bank_card_number"))
+
+        if self.request.query_params_format.get("bank_name") :
+            QuerySet = QuerySet.filter(bank_name__contains=self.request.query_params_format.get("bank_name"))
+
+        if self.request.query_params_format.get("open_name") :
+            QuerySet = QuerySet.filter(open_name__contains=self.request.query_params_format.get("open_name"))
+
+        if self.request.query_params_format.get("amount") :
+            QuerySet = QuerySet.filter(amount=self.request.query_params_format.get("amount"))
 
         if self.request.query_params_format.get("memo") :
             QuerySet = QuerySet.filter(memo__contains=self.request.query_params_format.get("memo"))
@@ -240,6 +252,9 @@ class OrderAPIView(GenericViewSetCustom):
         if self.request.query_params_format.get("no") :
             QuerySet = QuerySet.filter(downordercode=self.request.query_params_format.get("no"))
 
+        if self.request.query_params_format.get("df_status") :
+            QuerySet = QuerySet.filter(df_status=self.request.query_params_format.get("df_status"))
+
         if self.request.user.rolecode in ["1000", "1001", "1005"]:
             pass
         elif self.request.user.rolecode == '2001':
@@ -247,7 +262,16 @@ class OrderAPIView(GenericViewSetCustom):
         else:
             raise PubErrorCustom("用户类型有误!")
 
-        return {"data": CashoutListModelSerializer(QuerySet.filter(paypassid__gt=0).order_by('-createtime'),many=True).data}
+
+        if self.request.query_params_format.get("sort") :
+            if self.request.query_params_format.get("sort") == '0':
+                QuerySet = QuerySet.filter().order_by('-createtime')
+            elif self.request.query_params_format.get("sort") == '1':
+                QuerySet = QuerySet.filter().order_by('createtime')
+        else:
+            QuerySet = QuerySet.filter().order_by('-createtime')
+
+        return {"data": CashoutListModelSerializer(QuerySet,many=True).data}
 
     @list_route(methods=['GET'])
     @Core_connector(pagination=True)

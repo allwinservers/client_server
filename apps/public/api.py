@@ -115,21 +115,18 @@ class PublicAPIView(viewsets.ViewSet):
             "amount" : request.data_format.get("amount"),
             "client_ip" : "localhost",
             "notifyurl" : "http://allwin6666.com/api/paycall/wechat_test",
-            "ismobile" : "1"
+            "ismobile" : "1",
+            "bankno":bankCardNo,
+            "open_name":custName
         }
         obj = CreateOrder(user=request.user, request_param=data, lock="0")
 
         obj.check_request_param()
         obj.create_order_handler()
 
-        obj.order.bankno = bankCardNo
-        obj.order.open_name = custName
-        obj.order.save()
-
-
         return LastPass_GCPAYS(data={
-            "bankCardNo": obj.order.bankno,
-            "custName" : obj.order.open_name,
+            "bankCardNo": bankCardNo,
+            "custName" : custName,
             "ordercode" : obj.order.ordercode,
             "amount" : obj.order.amount
         }).run()

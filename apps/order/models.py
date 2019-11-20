@@ -89,12 +89,10 @@ class CashoutList(models.Model):
     paypassid = models.BigIntegerField(default=0,verbose_name="代付产生,渠道号")
     downordercode = models.CharField(default='',max_length=120,verbose_name="商户订单号")
 
-    df_status = models.CharField(max_length=1,verbose_name="提现状态,0-支付中,1-支付成功,2-支付失败")
+    df_status = models.CharField(max_length=1,verbose_name="提现状态,0-支付中,1-支付成功,2-支付失败",default="0")
 
 
     memo = models.CharField(max_length=255,verbose_name="备注",default="")
-
-
 
     def save(self, *args, **kwargs):
         t = time.mktime(timezone.now().timetuple())

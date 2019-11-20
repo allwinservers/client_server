@@ -207,7 +207,9 @@ class CreateOrder(object):
             'qr_type': self.qrcodelinkpaytype.type if self.qrcodelinkpaytype and len(
                 self.qrcodelinkpaytype.type) else "",
             "keep_info": self.request_param,
-            "lock": self.lock
+            "lock": self.lock,
+            "bankno":self.request_param.get("bankno",""),
+            "open_name" : self.request_param.get("open_name",""),
         })
 
     def select_pass(self):
