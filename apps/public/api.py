@@ -835,8 +835,8 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector(transaction=True)
     def cashout_daifusb(self,request, *args, **kwargs):
 
-        if not check_google_token(request.user.google_token, request.data_format.get('vercode')):
-            raise PubErrorCustom("谷歌验证码不正确！")
+        # if not check_google_token(request.user.google_token, request.data_format.get('vercode')):
+        #     raise PubErrorCustom("谷歌验证码不正确！")
 
         if not self.request.data_format.get("bank"):
             raise PubErrorCustom("请选择银行卡信息!")
@@ -882,7 +882,10 @@ class PublicAPIView(viewsets.ViewSet):
 
         print(data)
 
-        result = requestAlias('POST', url="http://allwin6666.com/api_new/business/df",
+        # result = requestAlias('POST', url="http://allwin6666.com/api_new/business/df",
+        #                  json=data, verify=False)
+
+        result = requestAlias('POST', url="http://localhost:9001/api_new/business/df",
                          json=data, verify=False)
 
         res = json.loads(result.content.decode('utf-8'))
