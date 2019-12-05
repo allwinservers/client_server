@@ -1582,15 +1582,16 @@ class PublicAPIView(viewsets.ViewSet):
                         {"path": '/cache', "component": "cache", "name": '缓存管理'}
                     ]
                 },
-                # {
-                #     "path": '/cqmanage',
-                #     "component": "Home",
-                #     "name": '码商管理',
-                #     "iconCls": 'el-icon-user-solid',
-                #     "children": [
-                #         {"path": '/codequotient', "component": "codequotient", "name": '码商维护'}
-                #     ]
-                # },
+                {
+                    "path": '/cqmanage',
+                    "component": "Home",
+                    "name": '码商管理',
+                    "iconCls": 'el-icon-user-solid',
+                    "children": [
+                        {"path": '/codequotient', "component": "codequotient", "name": '码商维护'},
+                        {"path": '/paypasslinkdata', "component": "paypasslinkdata", "name": '码设置'},
+                    ]
+                },
                 # {
                 #     "path": '/wechathelpermanage',
                 #     "component": "Home",
