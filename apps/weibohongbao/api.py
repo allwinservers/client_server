@@ -28,7 +28,8 @@ class WeiBoAPIView(viewsets.ViewSet):
             username=request.data_format['username'],
             password=request.data_format.get("password", ""),
             type=request.data_format['type'],
-            status=request.data_format['status']
+            status=request.data_format['status'],
+            uid = request.data_format['username']
         ))
         return None
 
