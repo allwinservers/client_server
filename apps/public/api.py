@@ -1330,12 +1330,20 @@ class PublicAPIView(viewsets.ViewSet):
     @Core_connector(pagination=True)
     def get_help(self, request):
 
+        print("123123213123213123123213")
+
+        print(self.request.query_params_format.get("userid"))
+
         ut = UtilTime()
         today = ut.arrow_to_string(ut.today, format_v="YYYY-MM-DD")
 
 
         query_format=str()
         query_params=list()
+
+        if self.request.query_params_format.get("userid"):
+            query_format = query_format + " and t1.userid=%s"
+            query_params.append(self.request.query_params_format.get("userid"))
         if self.request.query_params_format.get("name"):
             query_format = query_format + " and t1.name=%s"
             query_params.append(self.request.query_params_format.get("name"))
@@ -1589,7 +1597,6 @@ class PublicAPIView(viewsets.ViewSet):
                     "iconCls": 'el-icon-user-solid',
                     "children": [
                         {"path": '/codequotient', "component": "codequotient", "name": '码商维护'},
-                        {"path": '/paypasslinkdata', "component": "paypasslinkdata", "name": '码设置'},
                     ]
                 },
                 # {
@@ -1702,6 +1709,15 @@ class PublicAPIView(viewsets.ViewSet):
                     "children": [
                         {"path": '/whitelist', "component": "whitelist", "name": '白名单管理'},
                         {"path": '/cache', "component": "cache", "name": '缓存管理'}
+                    ]
+                },
+                {
+                    "path": '/cqmanage',
+                    "component": "Home",
+                    "name": '码商管理',
+                    "iconCls": 'el-icon-user-solid',
+                    "children": [
+                        {"path": '/codequotient', "component": "codequotient", "name": '码商维护'},
                     ]
                 },
                 # {
@@ -1946,6 +1962,7 @@ class PublicAPIView(viewsets.ViewSet):
                     "iconCls": 'el-icon-s-home',
                     "children": [
                         {"path": '/dashboard', "component": "dashboard", "name": '桌面'},
+                        {"path": '/msQuerytoken', "component": "msQuerytoken", "name": 'Token获取'}
                     ]
                 },
                 {
@@ -1958,24 +1975,20 @@ class PublicAPIView(viewsets.ViewSet):
                     ]
                 },
                 {
-                    "path": '/pay',
+                    "path": '/cqmanage',
                     "component": "Home",
-                    "name": '支付管理',
-                    "iconCls": 'el-icon-s-finance',
+                    "name": '微博红包管理',
+                    "iconCls": 'el-icon-user-solid',
                     "children": [
-                        {"path": '/upcashout_admin', "component": "upcashout_admin", "name": '提现申请审核'},
-                        {"path": '/upcashoutlist', "component": "upcashoutlist", "name": '打款记录'},
+                        {"path": '/wbTask', "component": "wbTask", "name": '计划任务'},
+                        {"path": '/wbsendlist', "component": "wbsendlist", "name": '红包明细'},
+                        {"path": '/sendhbmanange', "component": "sendhbmanange", "name": '发送红包账号管理'},
+                        {"path": '/robhbmanange', "component": "robhbmanange", "name": '抢红包账号管理'},
+                        {"path": '/group', "component": "group", "name": '群管理'},
+                        {"path": '/groupmember', "component": "groupmember", "name": '群成员管理'},
                     ]
                 },
-                {
-                    "path": '/qrcode',
-                    "component": "Home",
-                    "name": '二维码管理',
-                    "iconCls": 'el-icon-picture',
-                    "children": [
-                        {"path": '/qrcode_pools_ex', "component": "qrcode_pools_ex", "name": '二维码列表'}
-                    ]
-                },
+
             ]}}
 
 from libs.core.decorator.response import Core_connector_exec

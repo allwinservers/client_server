@@ -1,6 +1,6 @@
 from rest_framework import (viewsets)
 
-from education.settings import ServerUrl
+from education.settings import ServerUrl,CreateOrderUrl
 from apps.user.models import Users,BalList
 from utils.exceptions import PubErrorCustom
 from   django_redis  import   get_redis_connection
@@ -11,6 +11,9 @@ class GenericViewSetCustom(viewsets.ViewSet):
 
 def url_join(path=None):
     return "{}{}".format(ServerUrl,path) if path else ServerUrl
+
+def createorder_url(path=None):
+    return "{}{}".format(CreateOrderUrl,path) if path else CreateOrderUrl
 
 def upd_bal(**kwargs):
 

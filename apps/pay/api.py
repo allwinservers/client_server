@@ -8,9 +8,9 @@ from libs.utils.apistool import SaveSerializer
 from libs.utils.mytime import UtilTime
 
 from apps.pay.serializers import PayTypeModelSerializer,PayTypeModelSerializer1,\
-        PayPassModelSerializer,PayPassLinkTypeModelSerializer,RateSerializer,BankInfoModelSerializer,WeiboPayUsernameModelSerializer
+        PayPassModelSerializer,PayPassLinkTypeModelSerializer,RateSerializer,BankInfoModelSerializer
 
-from apps.pay.models import PayType,PayPass,PayPassLinkType,BankInfo,WeiboPayUsername
+from apps.pay.models import PayType,PayPass,PayPassLinkType,BankInfo
 
 from apps.user.serializers import BallistSerializer
 from libs.utils.mytime import send_toTimestamp
@@ -22,8 +22,6 @@ from apps.paycall.utils import PayCallBase
 
 from apps.business.weibo import WeiboLogin
 
-
-
 from apps.public.utils import get_sysparam
 from include.data.choices_list import Choices_to_List
 
@@ -31,141 +29,6 @@ class PayAPIView(viewsets.ViewSet):
 
     def get_authenticators(self):
         return [auth() for auth in [Authentication]]
-
-    @list_route(methods=['POST'])
-    @Core_connector(transaction=True)
-    def addPayPassLinkData(self, request, *args, **kwargs):
-
-        WeiboPayUsername.objects.create(**dict(
-            userid=request.data_format['userid'],
-            username=request.data_format['username'],
-            password=request.data_format.get("password", ""),
-            type=request.data_format['type'],
-            status=request.data_format['status']
-        ))
-
-        return None
-
-    @list_route(methods=['POST'])
-    @Core_connector(transaction=True)
-    def getVerCodeForWeibo(self, request, *args, **kwargs):
-        try:
-            paypass = WeiboPayUsername.objects.get(id=request.data_format['id'])
-        except WeiboPayUsername.DoesNotExist:
-            raise PubErrorCustom("无此账号信息!")
-        if paypass.type!='0':
-            raise PubErrorCustom("只有发送红包的账号可以验证码登录!")
-        WeiboLogin().get_vercode(username=paypass.username)
-
-    @list_route(methods=['POST'])
-    @Core_connector(transaction=True)
-    def vercodeLoginForWeibo(self, request, *args, **kwargs):
-        if not request.data_format.get("vercode",None):
-            raise PubErrorCustom("验证码不能为空!")
-
-        try:
-            paypass = WeiboPayUsername.objects.get(id=request.data_format['id'])
-        except WeiboPayUsername.DoesNotExist:
-            raise PubErrorCustom("无此账号信息!")
-        if paypass.type!='0':
-            raise PubErrorCustom("只有发送红包的账号可以验证码登录!")
-
-        session,res = WeiboLogin().login(username=paypass.username,smscode=request.data_format.get("vercode",None))
-        print(session)
-        paypass.session = session
-        paypass.logintime = UtilTime().timestamp
-        paypass.save()
-
-    @list_route(methods=['POST'])
-    @Core_connector(transaction=True)
-    def initOtherDataForWeibo(self, request, *args, **kwargs):
-
-        try:
-            paypass = WeiboPayUsername.objects.get(id=request.data_format['id'])
-        except WeiboPayUsername.DoesNotExist:
-            raise PubErrorCustom("无此账号信息!")
-        if paypass.type!='0':
-            raise PubErrorCustom("只有发送红包的账号可以验证码登录!")
-
-        s  = WeiboLogin(sessionRes=json.loads(paypass.session))
-        s.datainitHandler()
-        # print(session)
-        paypass.session = json.dumps(s.sessionRes)
-        paypass.save()
-        return None
-
-    @list_route(methods=['POST'])
-    @Core_connector(transaction=True)
-    def getSessionSSS(self, request, *args, **kwargs):
-
-        try:
-            paypass = WeiboPayUsername.objects.get(id=request.data_format['id'])
-        except WeiboPayUsername.DoesNotExist:
-            raise PubErrorCustom("无此账号信息!")
-        session = json.dumps({
-            "st": "769696",
-            "uid": "6424853549",
-            "gsid": "_2A25w49PpDeRxGeBK6VYZ9S3JzzWIHXVRuWAhrDV6PUJbkdAKLVTRkWpNR848UCh0aEfqVWJJUXU-K8hCJACsw_Od",
-            "cookie": {
-                "SUB": "_2A25w49PqDeRhGeBK6VYZ9S3JzzWIHXVQfoeirDV8PUJbitANLVLFkWtNR848UBzF-WUfgZC7eFd_O_J3fBaGLzE9",
-                "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt",
-                "SCF": "AjOaGw1K_o2AsNr4Ql_tYHnWtwXMs_0EzBjlhVrMRn9__3dFIc0a2lum8eMmDo5p-w..",
-                "SUHB": "0jBIffZWGBgbfV"
-            }
-        })
-        paypass.session = session
-
-        paypass.save()
-
-        return None
-
-    @list_route(methods=['POST'])
-    @Core_connector(transaction=True)
-    def updPayPassLinkData(self, request, *args, **kwargs):
-        try:
-            paypass = WeiboPayUsername.objects.get(id=request.data_format['id'])
-        except WeiboPayUsername.DoesNotExist:
-            raise PubErrorCustom("无此账号信息!")
-
-        paypass.password = request.data_format['password']
-        paypass.type = request.data_format['type']
-        paypass.status = request.data_format['status']
-        paypass.session = request.data_format['session']
-        paypass.save()
-
-        return None
-
-    @list_route(methods=['POST'])
-    @Core_connector(transaction=True)
-    def delPayPassLinkData(self, request, *args, **kwargs):
-        WeiboPayUsername.objects.filter(id=request.data_format['id']).delete()
-
-        return None
-
-    @list_route(methods=['GET'])
-    @Core_connector(pagination=True)
-    def getPayPassLinkData(self, request, *args, **kwargs):
-
-        query = WeiboPayUsername.objects.filter()
-
-        if request.query_params_format.get('userid', None):
-            query = query.filter(userid=request.query_params_format['userid'])
-
-        if request.query_params_format.get("username", None):
-            query = query.filter(username=request.query_params_format['username'])
-
-        if request.query_params_format.get("type", None):
-            query = query.filter(type=request.query_params_format['type'])
-
-        if request.query_params_format.get("status", None):
-            query = query.filter(status=request.query_params_format['status'])
-
-        if request.query_params_format.get("startdate") and request.query_params_format.get("enddate"):
-            query = query.filter(
-                createtime__lte=send_toTimestamp(request.query_params_format.get("enddate")),
-                createtime__gte=send_toTimestamp(request.query_params_format.get("startdate")))
-
-        return {"data": WeiboPayUsernameModelSerializer(query, many=True).data}
 
     @list_route(methods=['POST'])
     @Core_connector(transaction=True)

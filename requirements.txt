@@ -22,3 +22,4 @@ pycryptodome
 demjson
 pyDes
 python-stdnum==1.3
+rsa

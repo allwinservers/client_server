@@ -113,26 +113,26 @@ class BankInfo(models.Model):
         db_table = 'bankinfo'
 
 
-class WeiboPayUsername(models.Model):
-
-    id=models.BigAutoField(primary_key=True,verbose_name="关联ID")
-    userid=models.IntegerField(default=0,verbose_name="码商ID")
-    username = models.CharField(max_length=60,verbose_name="账号",default='')
-    password = models.CharField(max_length=60, verbose_name="密码",default='')
-    session = models.TextField(verbose_name="会话信息",default='')
-    type = models.CharField(max_length=1,verbose_name="类型,0-发送的,1-抢红包的",default='0')
-
-    status = models.CharField(max_length=1,verbose_name="是否开启,0-开启,1-暂用",default='1')
-
-    createtime = models.BigIntegerField(default=0)
-    logintime = models.BigIntegerField(default=0,verbose_name="微博登录时间")
-
-    def save(self, *args, **kwargs):
-        if not self.createtime:
-            self.createtime = time.mktime(timezone.now().timetuple())
-        return super(WeiboPayUsername, self).save(*args, **kwargs)
-
-    class Meta:
-        verbose_name = '红包账号表'
-        verbose_name_plural = verbose_name
-        db_table = 'webpayusername'
+# class WeiboPayUsername(models.Model):
+#
+#     id=models.BigAutoField(primary_key=True,verbose_name="关联ID")
+#     userid=models.IntegerField(default=0,verbose_name="码商ID")
+#     username = models.CharField(max_length=60,verbose_name="账号",default='')
+#     password = models.CharField(max_length=60, verbose_name="密码",default='')
+#     session = models.TextField(verbose_name="会话信息",default='')
+#     type = models.CharField(max_length=1,verbose_name="类型,0-发送的,1-抢红包的",default='0')
+#
+#     status = models.CharField(max_length=1,verbose_name="是否开启,0-开启,1-暂用",default='1')
+#
+#     createtime = models.BigIntegerField(default=0)
+#     logintime = models.BigIntegerField(default=0,verbose_name="微博登录时间")
+#
+#     def save(self, *args, **kwargs):
+#         if not self.createtime:
+#             self.createtime = time.mktime(timezone.now().timetuple())
+#         return super(WeiboPayUsername, self).save(*args, **kwargs)
+#
+#     class Meta:
+#         verbose_name = '红包账号表'
+#         verbose_name_plural = verbose_name
+#         db_table = 'webpayusername'
