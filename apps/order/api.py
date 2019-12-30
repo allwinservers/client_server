@@ -235,6 +235,9 @@ class OrderAPIView(GenericViewSetCustom):
         if self.request.query_params_format.get("amount") :
             QuerySet = QuerySet.filter(amount=self.request.query_params_format.get("amount"))
 
+        if self.request.query_params_format.get("userid") :
+            QuerySet = QuerySet.filter(userid=self.request.query_params_format.get("userid"))
+
         if self.request.query_params_format.get("memo") :
             QuerySet = QuerySet.filter(memo__contains=self.request.query_params_format.get("memo"))
 
