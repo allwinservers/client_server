@@ -19,7 +19,7 @@ from apps.user.models import UserLink
 from apps.utils import RedisOrderCount
 
 from apps.account import AccountStop,AccountStopCanle
-
+from apps.utils import url_join
 import json
 from apps.order.utils import get_today_start_end_time
 
@@ -174,7 +174,7 @@ class OrderAPIView(GenericViewSetCustom):
         }
 
         result = requestEx('POST',
-                         url='http://allwin6666.com/callback_api/lastpass/shougonghandler_callback',
+                         url=url_join('/callback_api/lastpass/shougonghandler_callback'),
                          data=request_data,
                          json=request_data, verify=False)
 
