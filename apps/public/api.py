@@ -680,8 +680,16 @@ class PublicAPIView(viewsets.ViewSet):
         query_params=list()
 
         if self.request.query_params_format.get("userid"):
-            query_format = query_format + " and t1.userid=%s"
-            query_params.append(str(self.request.query_params_format.get("userid")))
+            query_format = query_format + " and ("
+            count = 0
+            for item in self.request.query_params_format.get("userid").split(","):
+                count +=1
+                if count == 1:
+                    query_format = query_format + " t1.userid=%s"
+                else:
+                    query_format = query_format + " or t1.userid=%s"
+                query_params.append(str(item))
+            query_format = query_format + " ) "
 
         if self.request.query_params_format.get("status"):
             query_format = query_format + " and t1.status=%s"
@@ -1533,8 +1541,7 @@ class PublicAPIView(viewsets.ViewSet):
                     "iconCls": 'el-icon-s-shop',
                     "children": [
                         {"path": '/waitbn', "component": "waitbn", "name": '待审核商户'},
-                        {"path": '/bnlist', "component": "bnlist", "name": '商户列表'},
-                        {"path": '/bnlist_new', "component": "bnlist_new", "name": '商户列表新'}
+                        {"path": '/bnlist', "component": "bnlist", "name": '商户列表'}
                     ]
                 },
                 {
@@ -1780,6 +1787,134 @@ class PublicAPIView(viewsets.ViewSet):
                         {"path": '/cashoutlist_admin_df', "component": "cashoutlist_admin_df", "name": '提现记录(代付)'}
                     ]
                 },
+                # {
+                #     "path": '/cqmanage',
+                #     "component": "Home",
+                #     "name": '码商管理',
+                #     "iconCls": 'el-icon-user-solid',
+                #     "children": [
+                #         {"path": '/codequotient', "component": "codequotient", "name": '码商维护'}
+                #     ]
+                # },
+                # {
+                #     "path": '/wechathelpermanage',
+                #     "component": "Home",
+                #     "name": '店员助手管理',
+                #     "iconCls": 'el-icon-coffee',
+                #     "children": [
+                #         {"path": '/wechathelper', "component": "wechathelper", "name": '店员助手维护'}
+                #     ]
+                # },
+                # {
+                #     "path": '/qrcode',
+                #     "component": "Home",
+                #     "name": '二维码管理',
+                #     "iconCls": 'el-icon-picture',
+                #     "children": [
+                #         {"path": '/qr_code_pool', "component": "qr_code_pool", "name": '二维码新增'},
+                #         {"path": '/qrcode_pools', "component": "qrcode_pools", "name": '二维码列表',
+                #          "query": {"id": "id","wechathelper_id":"wechathelper_id"}}
+                #     ]
+                # },
+            ]}}
+        elif request.user.rolecode in ["1006"]:
+            return {"data": {"router": [
+                {
+                    "path": '/',
+                    "component": "Home",
+                    "name": '首页',
+                    "iconCls": 'el-icon-s-home',
+                    "children": [
+                        {"path": '/dashboard', "component": "dashboard", "name": '桌面'},
+                    ]
+                },
+                {
+                    "path": '/anquan',
+                    "component": "Home",
+                    "name": '安全管理',
+                    "iconCls": 'el-icon-s-finance',
+                    "children": [
+                        {"path": '/passwd', "component": "passwd", "name": '密码修改'}
+                    ]
+                },
+                # {
+                #     "path": '/business',
+                #     "component": "Home",
+                #     "name": '商户管理',
+                #     "iconCls": 'el-icon-s-shop',
+                #     "children": [
+                #         {"path": '/waitbn', "component": "waitbn", "name": '待审核商户'},
+                #         {"path": '/bnlist', "component": "bnlist", "name": '商户列表'}
+                #     ]
+                # },
+                # {
+                #     "path": '/agent',
+                #     "component": "Home",
+                #     "name": '代理人管理',
+                #     "iconCls": 'el-icon-s-custom',
+                #     "children": [
+                #         {"path": '/agentadd', "component": "agentadd", "name": '待审核代理人'},
+                #         {"path": '/agentlist', "component": "agentlist", "name": '代理人列表'}
+                #     ]
+                # },
+                # {
+                #     "path": '/finance',
+                #     "component": "Home",
+                #     "name": '财务数据',
+                #     "iconCls": 'el-icon-s-finance',
+                #     "children": [
+                #         {"path": '/busicount', "component": "busicount", "name": '通道数据'},
+                #         {"path": '/passcount', "component": "passcount", "name": '渠道数据'},
+                #         {"path": '/ordercount', "component": "ordercount", "name": '每日报表'},
+                #         {"path": '/ballist_admin', "component": "ballist_admin", "name": '资金明细'},
+                #         {"path": '/ubaladmin', "component": "ubaladmin", "name": '调账'},
+                #         {"path": '/accCheckok', "component": "accCheckok", "name": '对账'},
+                #     ]
+                # },
+                {
+                    "path": '/pay',
+                    "component": "Home",
+                    "name": '支付管理',
+                    "iconCls": 'el-icon-s-finance',
+                    "children": [
+                        {"path": '/paypassNew', "component": "paypassNew", "name": '支付渠道'},
+                        {"path": '/paytype', "component": "paytype", "name": '支付方式'},
+                        # {"path": '/up_cashout', "component": "up_cashout", "name": '提现申请(码商)'},
+                        # {"path": '/upcashoutlist_ss', "component": "upcashoutlist_ss", "name": '提现申请记录(码商)'},
+                        # {"path": '/upcashoutlist', "component": "upcashoutlist", "name": '打款记录(码商)'},
+                        {"path": '/cashoutlist_admin', "component": "cashoutlist_admin", "name": '提现申请审核(下游)'},
+                        {"path": '/cashoutlist1', "component": "cashoutlist1", "name": '打款记录(下游)'},
+                    ]
+                },
+                {
+                    "path": '/order',
+                    "component": "Home",
+                    "name": '订单管理',
+                    "iconCls": 'el-icon-s-order',
+                    "children": [
+                        {"path": '/orderlist', "component": "orderlist", "name": '订单列表'},
+                        {"path": '/cashoutlist_admin_df', "component": "cashoutlist_admin_df", "name": '代付订单列表'}
+                    ]
+                },
+                {
+                    "path": '/sys',
+                    "component": "Home",
+                    "name": '系统管理',
+                    "iconCls": 'el-icon-s-order',
+                    "children": [
+                        {"path": '/whitelist', "component": "whitelist", "name": '白名单管理'},
+                        {"path": '/cache', "component": "cache", "name": '缓存管理'}
+                    ]
+                },
+                # {
+                #     "path": '/cqmanage',
+                #     "component": "Home",
+                #     "name": '码商管理',
+                #     "iconCls": 'el-icon-user-solid',
+                #     "children": [
+                #         {"path": '/codequotient', "component": "codequotient", "name": '码商维护'},
+                #     ]
+                # },
                 # {
                 #     "path": '/cqmanage',
                 #     "component": "Home",

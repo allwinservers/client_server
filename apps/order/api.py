@@ -62,7 +62,7 @@ class OrderAPIView(GenericViewSetCustom):
         if request.query_params_format.get("down_status"):
             QuerySet = QuerySet.filter(down_status=request.query_params_format.get("down_status"))
 
-        if request.user.rolecode in ["1000","1001"]:
+        if request.user.rolecode in ["1000","1001","1006"]:
             pass
         elif request.user.rolecode == "2001" :
             QuerySet=QuerySet.filter(userid=self.request.user.userid)
@@ -204,7 +204,7 @@ class OrderAPIView(GenericViewSetCustom):
 
         QuerySet = CashoutList.objects.all()
 
-        if self.request.user.rolecode in ["1000","1001","1005"]:
+        if self.request.user.rolecode in ["1000","1001","1005","1006"]:
             pass
         elif self.request.user.rolecode == '2001':
             QuerySet = QuerySet.filter(userid=self.request.user.userid)
@@ -258,7 +258,7 @@ class OrderAPIView(GenericViewSetCustom):
         if self.request.query_params_format.get("df_status") :
             QuerySet = QuerySet.filter(df_status=self.request.query_params_format.get("df_status"))
 
-        if self.request.user.rolecode in ["1000", "1001", "1005"]:
+        if self.request.user.rolecode in ["1000", "1001", "1005","1006"]:
             pass
         elif self.request.user.rolecode == '2001':
             QuerySet = QuerySet.filter(userid=self.request.user.userid)
@@ -305,7 +305,7 @@ class OrderAPIView(GenericViewSetCustom):
         if self.request.query_params_format.get("no") :
             QuerySet = QuerySet.filter(downordercode=self.request.query_params_format.get("no"))
 
-        if self.request.user.rolecode in ["1000","1001","1005"]:
+        if self.request.user.rolecode in ["1000","1001","1005","1006"]:
             pass
         elif self.request.user.rolecode == '2001':
             QuerySet = QuerySet.filter(userid=self.request.user.userid)
@@ -323,7 +323,7 @@ class OrderAPIView(GenericViewSetCustom):
 
         QuerySet = UpCashoutList.objects.all()
 
-        if self.request.user.rolecode in ["1000","1001","1005"]:
+        if self.request.user.rolecode in ["1000","1001","1005","1006"]:
             pass
         elif self.request.user.rolecode == '4001':
             QuerySet = QuerySet.filter(userid_to=self.request.user.userid)
@@ -338,7 +338,7 @@ class OrderAPIView(GenericViewSetCustom):
 
         QuerySet = UpCashoutList.objects.all()
 
-        if self.request.user.rolecode in ["1000", "1001","1005"]:
+        if self.request.user.rolecode in ["1000", "1001","1005","1006"]:
             pass
         elif self.request.user.rolecode == '4001':
             QuerySet = QuerySet.filter(userid_to=self.request.user.userid)

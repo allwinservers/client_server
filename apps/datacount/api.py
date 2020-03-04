@@ -46,7 +46,7 @@ class DataCountAPIView(GenericViewSetCustom):
         #流水统计,订单比数统计,成功率
         QuerySet = Order.objects.all()
 
-        if self.request.user.rolecode in ["1000","1001","1005"]:
+        if self.request.user.rolecode in ["1000","1001","1005","1006"]:
             pass
         elif self.request.user.rolecode == '2001':
             QuerySet = QuerySet.filter(userid=self.request.user.userid)
@@ -159,7 +159,7 @@ class DataCountAPIView(GenericViewSetCustom):
                 today__lte = request.query_params_format.get("enddate")[:10],
                 today__gte = request.query_params_format.get("startdate")[:10])
 
-        if self.request.user.rolecode in ["1000", "1001"]:
+        if self.request.user.rolecode in ["1000", "1001","1006"]:
             if request.query_params_format.get("userid"):
                 query = query.filter(userid=request.query_params_format.get("userid"))
         elif self.request.user.rolecode == '2001':
