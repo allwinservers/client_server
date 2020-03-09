@@ -682,7 +682,7 @@ class PublicAPIView(viewsets.ViewSet):
         if self.request.query_params_format.get("userid"):
             query_format = query_format + " and ("
             count = 0
-            for item in self.request.query_params_format.get("userid").split(","):
+            for item in str(self.request.query_params_format.get("userid")).split(","):
                 count +=1
                 if count == 1:
                     query_format = query_format + " t1.userid=%s"
