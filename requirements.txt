@@ -14,7 +14,7 @@ django-apscheduler
 django-crontab
 django-redis
 redis
-arrow==0.13.1
+arrow==0.15.1
 pyotp
 cryptography
 cryptokit
